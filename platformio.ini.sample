@@ -1,0 +1,29 @@
+;#################################################################
+;## NOTAS:
+;## Para AVR/Arduino se debe aumentar el buffer size utilizando un
+;## build_flag para definir el macro SERIAL_RX_BUFFER_SIZE. En
+;## caso de SAMD21 (Zero) el macro es SERIAL_BUFFER_SIZE. Este
+;## aumento de buffer es necesario para almacenar las tramas
+;## GPS devueltas por el simcom con el comando AT+CGNSINF
+;#################################################################
+
+;[env:uno]
+;platform = atmelavr
+;board = uno
+;framework = arduino
+;upload_port = /dev/ttyUSB0
+;build_flags = -D SERIAL_RX_BUFFER_SIZE=128
+
+;[env:megaatmega2560]
+;platform = atmelavr
+;board = megaatmega2560
+;framework = arduino
+;build_flags = -D SERIAL_RX_BUFFER_SIZE=128
+;upload_port = /dev/ttyUSB0
+
+;[env:zeroUSB]
+;platform = atmelsam
+;board = zeroUSB
+;framework = arduino
+;build_flags = -D SERIAL_BUFFER_SIZE=128
+;upload_port = /dev/ttyACM0

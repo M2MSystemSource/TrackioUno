@@ -1,0 +1,24 @@
+// datos de servidor remoto y APN de tarjeta SIM
+#define RH_APN "xxx"
+#define RH_APN_USER "xxx"
+#define RH_APN_PASS "xxx"
+#define RH_SERVER "xxx.xxx.xxx.xxx"
+#define RH_PORT "xxxx"
+
+// Pines analógicos de lectura de batería. Pueden cambiar en función del mcu
+#define VBAT_PIN A3
+#define VSYS_PIN A6
+#define VIN_PIN A2
+
+// Placas Rhomb.io, el socket indicaría el lugar donde insertamos el modem:
+//#define DEIMOS_SOCKET1_MEGA2560
+//#define DEIMOS_SOCKET2_MEGA2560
+//#define HALLEY_SOCKET2_MEGA2560
+//#define HALLEY_SOCKET2_UNO
+//#define DEIMOS_SOCKET1_ZEROSAMD21
+//#define DEIMOS_SOCKET1_UNO
+
+// Microcontrolador seleccionado:
+//#define PINS_MEGA2560
+//#define PINS_ZEROSAMD21D
+//#define PINS_UNO
