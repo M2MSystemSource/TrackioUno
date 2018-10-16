@@ -1,24 +1,60 @@
-// datos de servidor remoto y APN de tarjeta SIM
+/**
+ * @brief Numero de versión para los datos de configuración general.
+ *
+ * Al guardarse en eeprom necesitamos una variable de control que cargue los
+ * datos cuando sean modificados. Es decir, por defecto el sistema siempre
+ * tratará de cargar la configuración de la memoría EEPROM a no ser que el valor
+ * que tenga almacenado para `cfg.eeprom` sea distinto al que se haya definido
+ * aquí. Por lo tanto, siempre que modifiquemos algín dato de la configuración
+ * general será recomendable aumentar el valor de RH_eeprom para asegurar que
+ * la nueva configuración se aplica correctamente
+ */
+#define RH_configVersion 1
+
+// #####################################################
+// Configuración General. Determina el funcionamiento del dispositivo según
+// el Struct Conf en Trackio.h. Por favor, revisa la documentación en Trackio.h
+// para conocer el significado de cada parámetro
+#define RH_battMode 2
+#define RH_deepSleep false
+#define RH_eeprom RH_configVersion
+#define RH_gpsInterval 5
+#define RH_opmode OP_STARTUP
+#define RH_primaryOpMode OP_TCP
+#define RH_sleep false
+#define RH_transmissionClock 10
+#define RH_requiredVbat 3650
+#define RH_requiredVin 0
+#define RH_requiredVsys5v 0
+
+// #####################################################
+// Tarjeta SIM y servidor remoto
 #define RH_APN "xxx"
 #define RH_APN_USER "xxx"
 #define RH_APN_PASS "xxx"
-#define RH_SERVER "xxx.xxx.xxx.xxx"
-#define RH_PORT "xxxx"
+#define RH_SERVER "xxx"
+#define RH_PORT "xxx"
+// #define RH_SERVER "83.33.35.49"
+// #define RH_PORT "3135"
 
-// Pines analógicos de lectura de batería. Pueden cambiar en función del mcu
+// #####################################################
+// Pins para lectura analógica de baterías, cambian en función de la PCB y/o MCU
+// TODO: esto debería estar dentro de los bloques de PCBs en rhom-pins.h
 #define VBAT_PIN A3
 #define VSYS_PIN A6
 #define VIN_PIN A2
 
-// Placas Rhomb.io, el socket indicaría el lugar donde insertamos el modem:
-//#define DEIMOS_SOCKET1_MEGA2560
-//#define DEIMOS_SOCKET2_MEGA2560
-//#define HALLEY_SOCKET2_MEGA2560
-//#define HALLEY_SOCKET2_UNO
-//#define DEIMOS_SOCKET1_ZEROSAMD21
-//#define DEIMOS_SOCKET1_UNO
+// #####################################################
+// Selección de placa base, incluido el socket donde se conectará el Sim868
+// #define DEIMOS_SOCKET1_MEGA2560
+// #define DEIMOS_SOCKET2_MEGA2560
+// #define HALLEY_SOCKET2_MEGA2560
+// #define HALLEY_SOCKET2_UNO
+// #define DEIMOS_SOCKET1_ZEROSAMD21
+// #define DEIMOS_SOCKET1_UNO
 
-// Microcontrolador seleccionado:
-//#define PINS_MEGA2560
-//#define PINS_ZEROSAMD21D
-//#define PINS_UNO
+// #####################################################
+// Selección de MCU
+// #define PINS_MEGA2560
+// #define PINS_ZEROSAMD21D
+// #define PINS_UNO

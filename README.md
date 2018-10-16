@@ -102,7 +102,7 @@ En `upload_port` debes indicar el puerto en el que tienes conectada la placa, en
 
 La configuración se encuentra predefinida en el struct `Conf` del archivo Trackio.h. Este struct se inicializa por defecto en el método `Trackio::loadConf()` (Trackio.cpp) y se almacena en EEPROM. Por favor, revisa la documentación de `struct Conf` en Trackio.h para obtener detalles de cada configuración
 
-Además de la anterior configuración mencionada, también se deben editar los parámetros estáticos de `static-conf.h` donde se incluyen datos de la SIM (APN,user,pass), servidor remoto (url, port), pines analógicos de lectura de voltajes y algo muy importante: la configuración de pines de Rhomb.io. Esta configuración se ha incluído en el fichero `static-conf.h`.
+Para editar la configuración debes realizar las modificaciones necesarias en el archivo `static-conf.h` donde se incluyen todas las configuraciones disponibles. No edites directamente los ficheros de la librería como main.cpp, Trackio.cpp o Trackio.h.
 
 ### Configuración de Pines
 
@@ -150,14 +150,13 @@ Puedes ver en el anterior listado el resto de números para cada modo.
 
 > El modo operacional por defecto siempre debe ser OP_STARTUP, en la configuración de `cfg.primaryOpmode`, se establece el modo al que se cambiará una vez el startup finalice, este debe ser OP_AUTO o OP_TCP. No tendría sentido utilizar como primarios los modos OP_LOW y OP_RST.
 
-## Puertos UART
+## Puertos UART y debug
 
-Trackio necesita dos puertos UART, uno para comunicación con el modem y otro para mostrar información de debug por consola. Siempre que sea posible
-intentaremos utilizars UART's por hardware, pero en el caso del Atmega328p,
-donde solo tenemos 1 puerto hardware, este lo usamos para el modem y creamos un puerto via SoftwareSerial para debug. En UART de debug solo hacemos uso del canal TX y en el caso de Atmega328p por defecto seleccionamos el pin _SDA_ como TX.
+Trackio necesita dos puertos UART, uno para comunicación con el modem y otro para mostrar información de debug por consola. Siempre que sea posible intentaremos utilizar UART's por hardware, pero en el caso del Atmega328p, donde solo tenemos 1 puerto hardware, este lo usamos para el modem y creamos un puerto via SoftwareSerial para debug. En UART de debug solo hacemos uso del canal TX y en el caso de Atmega328p por defecto seleccionamos el pin _SDA_ como TX.
 
-La configuración de los puertos UART se realiza en el archivo _rhio-pins.h_ en función
-de la PCB y módulo seleccionado en _static-conf.h_.
+La configuración de los puertos UART se realiza en el archivo _rhio-pins.h_ en función de la PCB y módulo seleccionado en _static-conf.h_.
+
+Para obtener un debug del dispositivo deberemos conectarnos, en el caso del atmega328p, a los pines _SDA_ y _GND_ con una aplicación Serial a 9600 baudios. Si usamos otro mcu podemos seguir el estandar de Rhomb.io, donde `Serial` se encuentra en los pines `A_TX` y `A_RX` y `Serial1` en `B_TX` y `B_RX`.
 
 ## Formato de tramas GPS
 
@@ -193,3 +192,7 @@ Cuando el dispositivo no dispone de cobertura GPS se seguirán enviando datos al
 > La info de batería siempre aparecerá representada aunque sea con ceros: `{IMEI}|...|3872,0,0`
 
 >Las tramas se construyen en el método Trackio::transmitGps()
+
+## Copyright
+
+This software is property of M2M System Source S.L. Developed by Jordi Enguídanos with the contribution of Guillermo Alonso and Pedro Peláez

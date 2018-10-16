@@ -1,4 +1,13 @@
 # Changelog
+* **0.2.5 - 2018-10-16**
+  * Todos los valores de configuración se han transferido a `static-conf.h` para evitar modificaciones "innecesarias" en archivos CORE.
+  * Añadidas 3 nuevos GPIOS configurables de forma remota, IO7, MOSI y MISO. Eliminada LED01 como configurable de forma remota
+  * FIX BUG. Se detecta un error al entrar en modo sleep (Trackio::sleepNow()) por el cual el dispositivo nunca llegaba a entrar en modo bajo consumo (OP_LOW) y esto podía impedir que la batería se cargara correctamente cuando el potenciomtro (P1) tuviera un nivel de carga bajo
+  * FIX. Las variables requriedVbat/Vsys5v/Vin no estaban incluídas por defecto en la configuración inicial (Trackio::loadConf())
+  * FIX. Trackio::openTcp() existía una comprobación redundante al verificar si el puerto estaba realmente abierto
+  * Eliminadas algunas variables en desuso y ajustados los tipos de datos para reducir consumo de ram
+  * Cambios menores.
+
 
 * **0.2.4 - 2018-10-15**
   * En modo OP_TCP se utiliza el método `serialEvent()` (main.cpp) de Arduino para evitar el pool constante al `Serial.available()` en el loop principal.

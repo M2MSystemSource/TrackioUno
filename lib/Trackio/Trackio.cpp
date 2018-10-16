@@ -57,7 +57,7 @@ bool __DEBUG = true;
  *
  * El valor de cuantos fallos se admite está en el método Trackio::sendCommand()
  */
-int modemSerialsFails = 0;
+uint8_t modemSerialsFails = 0;
 
 /**
  * @brief Lleva un conteo de cuantas veces falla una conexión TCP.
@@ -65,15 +65,7 @@ int modemSerialsFails = 0;
  * A partir de determinado número se reiniciará el micro utilizando watchdog.
  * El valor de cuantos fallos se admite está en el método Trackio::openTcp()
  */
-int openTcpFails = 0;
-
-/**
- * @brief Numero de versión para los datos de configuración.
- *
- * Al guardarse en eeprom necesitamos una variable de control que cargue los
- * datos
- */
-char configVersion = 20;
+uint8_t openTcpFails = 0;
 
 /**
  * @brief Número de segundos que se irá a dormir (gneralmente gpsInterval)
@@ -160,19 +152,22 @@ void Trackio::configure () {
 void Trackio::loadConf () {
   eeprom_read_block((void*)&cfg, (void*)0, sizeof(cfg));
 
-  if (cfg.eeprom != configVersion) {
+  if (cfg.eeprom != RH_configVersion) {
     SerialMon.println(F("Caragando configuración por primera vez..."));
 
     // RECUERDA! Si realizas un cambio aquí, modifica la variable configVersion,
     // al inicio de este archivo, para asegurar que los cambios se aplican
-    cfg.battMode = 2;
-    cfg.deepSleep = true;
-    cfg.eeprom = configVersion;
-    cfg.gpsInterval = 5; // multiplicado por cfg.transmissionClock
-    cfg.opmode = OP_STARTUP;
-    cfg.primaryOpMode = OP_TCP;
-    cfg.sleep = true;
-    cfg.transmissionClock = 10;
+    cfg.battMode = RH_battMode;
+    cfg.deepSleep = RH_deepSleep;
+    cfg.eeprom = RH_eeprom;
+    cfg.gpsInterval = RH_gpsInterval; // multiplicado por cfg.transmissionClock
+    cfg.opmode = RH_opmode;
+    cfg.primaryOpMode = RH_primaryOpMode;
+    cfg.sleep = RH_sleep;
+    cfg.transmissionClock = RH_transmissionClock;
+    cfg.requiredVbat = RH_requiredVbat;
+    cfg.requiredVin = RH_requiredVin;
+    cfg.requiredVsys5v = RH_requiredVsys5v;
 
     eeprom_write_block((const void*)&cfg, (void*)0, sizeof(cfg));
   }
@@ -298,9 +293,9 @@ void Trackio::getSimcomBattery() {
 void Trackio::checkLowBattery () {
   char low = 0;
 
-  if (cfg.requiredVbat &&Trackio::vbat < cfg.requiredVbat) low = 1;
-  if (cfg.requiredVin && Trackio::vin < cfg.requiredVin) low = 1;
-  if (cfg.requiredVsys5v && Trackio::vsys_5v < cfg.requiredVsys5v) low = 1;
+  if (cfg.requiredVbat >0 && Trackio::vbat < cfg.requiredVbat) low = 1;
+  if (cfg.requiredVin > 0 && Trackio::vin < cfg.requiredVin) low = 1;
+  if (cfg.requiredVsys5v > 0 && Trackio::vsys_5v < cfg.requiredVsys5v) low = 1;
 
   if (low == 1) {
     // reset serial fails, evita reinicio antes de deep sleep
@@ -312,7 +307,7 @@ void Trackio::checkLowBattery () {
   } else {
     // si venimos de bajo consuno establecemos el modo OP_STARTUP para
     // iniciar la secuencia de arranque, que incluye encender el Simcom
-    // (y salir del bajo consumo)
+    // (y salir de bajo consumo)
     if (cfg.opmode == OP_LOW) {
       cfg.opmode = OP_STARTUP;
     }
@@ -437,43 +432,32 @@ bool Trackio::openTcp () {
     return false;
   }
 
+  // abrimos puerto
   char cmd[100];
-  sprintf(
-    cmd,
-    "AT+CIPSTART=\"TCP\",\"%s\",\"%s\"",
-    RH_SERVER, RH_PORT
-  );
-
+  sprintf(cmd, "AT+CIPSTART=\"TCP\",\"%s\",\"%s\"", RH_SERVER, RH_PORT);
   Trackio::sendCommand(cmd);
   Trackio::_delay(2000);
 
+  // procesamos respuesta
   char * response;
-  response = strtok(buffer, "\n"); // empty line
-  response = strtok(NULL, "\n"); // empty line
+  response = strtok(buffer, "\n"); // 1º empty line
+  response = strtok(NULL, "\n"); // 2º response
 
-  if (strstr(response, OK)) {
+  // si ya está abierto Sim868 devolverá OK, sino READY CONNECT
+  if (strstr(response, OK) || strstr(response, READY)) {
     openTcpFails = 0;
     SerialMon.println(F("TCP OPEN OK!"));
     Trackio::tcpOk = true;
     return true;
-  }
-
-  response = strtok(NULL, "\n"); // empty line
-  response = strtok(NULL, "\n"); // empty line
-  SerialMon.print(F("response: ")); SerialMon.print(response);
-  if (strstr(response, READY)) {
-    openTcpFails = 0;
-    SerialMon.println(F("TCP OPEN OK!"));
-    Trackio::tcpOk = true;
-    return true;
-  }
-
-  openTcpFails++;
-  if (openTcpFails == 3) {
-    delay(10000);
   }
 
   SerialMon.println(F("ERROR TCP OPEN!"));
+  openTcpFails++;
+  if (openTcpFails == 3) {
+    SerialMon.println("El TCP ha fallado en multiples ocasiones - Hard Reset!");
+    while (1) {} // llamamos al watchdog.
+  }
+
   return false;
 }
 
@@ -685,8 +669,10 @@ bool Trackio::processCommand (char * cmd) {
   // damos por hecho que es válido (luego se verá)
   bool isValidCmd = true;
 
-  if (strcmp(command.property, "IO6") == 0) return Trackio::cmd_setIO(IO06, command.value);
-  else if (strcmp(command.property, "LED01") == 0) return Trackio::cmd_setIO(LED01, command.value);
+  if      (strcmp(command.property, "IO6") == 0) return Trackio::cmd_setIO(IO06, command.value);
+  else if (strcmp(command.property, "IO7") == 0) return Trackio::cmd_setIO(IO07, command.value);
+  else if (strcmp(command.property, "MOSI") == 0) return Trackio::cmd_setIO(MOSI, command.value);
+  else if (strcmp(command.property, "MISO") == 0) return Trackio::cmd_setIO(MISO, command.value);
   else if (strcmp(command.property, "CFG") == 0)  return Trackio::cmd_setConf(command.value);
   else {
     // finalmente no es válido...
@@ -762,12 +748,10 @@ char * Trackio::extractCommand (char * cmd) {
 bool Trackio::cmd_setIO (int IO, char * status) {
   if (IO < 0 || IO > 100) return false;
 
-  if (strcmp(status, "ON") == 0) {
-    digitalWrite(IO, HIGH);
-  }
+  if      (strcmp(status, "ON")  == 0) digitalWrite(IO, HIGH);
   else if (strcmp(status, "OFF") == 0) digitalWrite(IO, LOW);
   else if (strcmp(status, "OUT") == 0) pinMode(IO, OUTPUT);
-  else if (strcmp(status, "IN") == 0) pinMode(IO, INPUT);
+  else if (strcmp(status, "IN")  == 0) pinMode(IO, INPUT);
 
   return true;
 }
@@ -849,7 +833,6 @@ bool Trackio::enableGprs () {
 }
 
 bool Trackio::gprsIsOpen () {
-  Trackio::gprsOk = false;
   if (!Trackio::cregOk) return false;
 
 	char x2[10] = "AT+CGATT?";
@@ -857,7 +840,6 @@ bool Trackio::gprsIsOpen () {
 
 	if (strstr(buffer, "OK")) {
 		SerialMon.println(F("GPRS SERVICE OK!!"));
-		Trackio::gprsOk = true;
 		return true;
 	}
 
@@ -954,10 +936,6 @@ void Trackio::sleepNow () {
 }
 
 void Trackio::sleepNow (float seconds) {
-  if (cfg.gpsInterval < 8) {
-    return;
-  }
-
   float cycles = seconds / 8;
   SerialMon.println(F("-------------- SLEEP NOW --------------"));
 

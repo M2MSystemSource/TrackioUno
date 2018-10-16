@@ -5,56 +5,63 @@
   #include <SoftwareSerial.h>
 
   #ifdef DEIMOS_SOCKET1_MEGA2560
-    #define GSM_PWREN 36 // IO00
+    #define GSM_PWREN  36 // IO00
     #define GSM_PWRKEY 33  // IO01
-    #define GPS_EN 44 // IO02
+    #define GPS_EN     44 // IO02
     #define GSM_STATUS 37 // IO03
+
     #define SerialSim Serial // comunicación con SIMCOM
     #define SerialMon Serial1 // debug, terminal
   #endif
 
   #ifdef DEIMOS_SOCKET2_MEGA2560
-    #define GSM_PWREN 47 // IO08
+    #define GSM_PWREN  47 // IO08
     #define GSM_PWRKEY 42  // IO09
-    #define GPS_EN 45 // IO10
+    #define GPS_EN     45 // IO10
     #define GSM_STATUS 4 // IO11
+
     #define SerialSim Serial1 // comunicación con SIMCOM
     #define SerialMon Serial // debug, terminal
   #endif
 
   #ifdef HALLEY_SOCKET2_MEGA2560
-    #define GSM_PWREN 47 // IO08
+    #define GSM_PWREN  47 // IO08
     #define GSM_PWRKEY 42  // IO09
-    #define GPS_EN 45 // IO10
+    #define GPS_EN     45 // IO10
     #define GSM_STATUS 4 // IO11
+
     #define SerialSim Serial1 // comunicación con SIMCOM
+    #define SerialMon Serial // comunicación con SIMCOM
   #endif
 
   #ifdef HALLEY_SOCKET2_UNO
-    #define GSM_PWREN 8
+    #define GSM_PWREN  8
     #define GSM_PWRKEY 9
-    #define GPS_EN 10
+    #define GPS_EN     10
     #define GSM_STATUS 11
+
     #define SerialSim Serial     // comunicación con SIMCOM
     extern SoftwareSerial SoftSerial;
     #define SerialMon SoftSerial // comunicación con SIMCOM
   #endif
 
   #ifdef DEIMOS_SOCKET1_ZEROSAMD21
-    #define GSM_PWREN 2
+    #define GSM_PWREN  2
     #define GSM_PWRKEY 5
-    #define GPS_EN 6
+    #define GPS_EN     6
     #define GSM_STATUS 7
+
     #define SerialSim Serial1    // comunicación con SIMCOM
     #define SerialMon Serial // comunicación con SIMCOM
     // #define SerialMon SerialUSB // comunicación con SIMCOM
   #endif
 
   #ifdef DEIMOS_SOCKET1_UNO
-    #define GSM_PWREN 4
+    #define GSM_PWREN  4
     #define GSM_PWRKEY 5
-    #define GPS_EN 6
+    #define GPS_EN     6
     #define GSM_STATUS 7
+
     #define SerialSim Serial     // comunicación con SIMCOM
     extern SoftwareSerial SoftSerial;
     #define SerialMon SoftSerial // comunicación con SIMCOM
@@ -120,35 +127,30 @@
   #endif
 
   #ifdef PINS_UNO
-    #define NMI     		2
-    #define _INT0    		3
-
-    #define IO00     		4
-    #define IO01     		5
-    #define IO02     		6
-    #define IO03     		7
-    #define IO04     		8
-    #define IO05     		A0
-    #define IO06     		A1
-    #define IO07     		A2
-
-    #define LED01    		9
-    #define PWM0    		9
-
-    #define RXD    		0
-    #define TXD    		1
-    #define SDA     		A4
-    #define SCL     		A5
-    #define MOSI    		11
-    #define MISO    		12
-    #define SCK     		13
-    #define CS0      		10
-    #define _1WIRE	 	A3		// SJ4 must be closed & SJ1 must be open
-
-    #define AD0    		A6
-    #define CAPT0   		A7
-
-    #define RSTOUT	 	A3		// SJ1 must be closed & SJ4 must be open
+    #define NMI     2
+    #define _INT0   3
+    #define IO00    4
+    #define IO01    5
+    #define IO02    6
+    #define IO03    7
+    #define IO04    8
+    #define IO05    A0
+    #define IO06    A1
+    #define IO07    A2
+    #define LED01   9
+    #define PWM0    9
+    #define RXD     0
+    #define TXD     1
+    #define SDA     A4
+    #define SCL     A5
+    #define MOSI    11
+    #define MISO    12
+    #define SCK     13
+    #define CS0     10
+    #define _1WIRE  A3		// SJ4 must be closed & SJ1 must be open
+    #define AD0     A6
+    #define CAPT0   A7
+    #define RSTOUT  A3		// SJ1 must be closed & SJ4 must be open
   #endif
 
 #endif

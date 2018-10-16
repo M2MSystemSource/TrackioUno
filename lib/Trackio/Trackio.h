@@ -35,7 +35,7 @@
 #include "static-conf.h"
 #include "rhio-pins.h"
 
-// no tocar... por que tocas!!
+// OFFSETS para el cálculo en las lecturas analógicas de baterías
 const float mV_step_used = 0.00322265625;
 const float aux_bat = 0.31972789115646258503401360544218;
 const float aux_ext_bat = 0.04489016236867239732569245463228;
@@ -56,9 +56,24 @@ const float aux_ext_bat = 0.04489016236867239732569245463228;
  * El consumo de batería será alto, no hay posibilidad de entrar en modo de
  * bajo consumo (sleep), el socket TCP permanece siempre abierto.
  */
-#define OP_AUTO 1
 #define OP_TCP 2
+/**
+ * @brief Modo operacional automático, no mantiene el socket abierto.
+ */
+#define OP_AUTO 1
+
+/**
+ * @brief Fuerza un RESET del sistema utilizando el watchdog mediante un loop
+ * infinito
+ */
 #define OP_RST 4
+
+/**
+ * @brief Modo operacional de bajo consumo.
+ *
+ * Apagará el MCU y el modem, el dispositivo dejará de funcionar hasta que los
+ * valores de batería determinados en cfg.requiredVbat/Vsys/Vin se repongan.
+ */
 #define OP_LOW 5
 
 /**
@@ -262,11 +277,6 @@ class Trackio {
     bool cregOk;
 
     /**
-     * @brief Indica si hay registro en la red GPRS
-     */
-    bool gprsOk;
-
-    /**
      * @brief Indica si se ha realizado GPS FIX
      */
     bool gpsFix;
@@ -310,15 +320,7 @@ class Trackio {
      * almacena desde tcpHasCommand(). El método processCommand() se encarga
      * de validar y ejecutar la orden del comando.
      */
-    char cmd[30];
-
-    /**
-     * @brief Indica si el dispositivo sale de sleep. Se utiliza con el modo
-     * op_auto para controlar el timer del gps: si venimos de dormir ya hemos
-     * esperado el intervalo de tiempo para obtener GPS por lo que no volvemos a
-     * esperar.
-     */
-    bool comesFromSleep;
+    char cmd[20];
 
     /**
      * @brief Almacena el ultimo dato de calidad de señal GSM.
