@@ -392,35 +392,35 @@ bool Trackio::checkCreg () {
   Trackio::cregOk = false;
 
   // Verificamos el creg 10 veces
-	for (int i=0; i<10; i++) {
-		char x2[9] = "AT+CREG?";
-	  Trackio::sendCommand(x2);
+  for (int i=0; i<10; i++) {
+    char x2[9] = "AT+CREG?";
+    Trackio::sendCommand(x2);
 
-		if (strstr(buffer, ",5") || strstr(buffer, ",1")) {
-	    Trackio::cregOk = true;
-			return true;
-	  }
+    if (strstr(buffer, ",5") || strstr(buffer, ",1")) {
+      Trackio::cregOk = true;
+      return true;
+    }
 
-		Trackio::_delay(1000);
-	}
+    Trackio::_delay(1000);
+  }
 
-	return false;
+  return false;
 }
 
 bool Trackio::checkModem () {
-	Trackio::atOk = false;
+  Trackio::atOk = false;
 
-	if (Trackio::sendCommand((char *) "AT", OK)) {
-		Trackio::atOk = true;
+  if (Trackio::sendCommand((char *) "AT", OK)) {
+    Trackio::atOk = true;
 
-		Trackio::_delay(100);
+    Trackio::_delay(100);
 
-		char x2[5] = "ATE0";
-		Trackio::sendCommand(x2);
-		Trackio::_delay(100);
-	}
+    char x2[5] = "ATE0";
+    Trackio::sendCommand(x2);
+    Trackio::_delay(100);
+  }
 
-	return Trackio::atOk;
+  return Trackio::atOk;
 }
 
 // #############################################################################
@@ -835,16 +835,16 @@ bool Trackio::enableGprs () {
 bool Trackio::gprsIsOpen () {
   if (!Trackio::cregOk) return false;
 
-	char x2[10] = "AT+CGATT?";
+  char x2[10] = "AT+CGATT?";
   Trackio::sendCommand(x2);
 
-	if (strstr(buffer, "OK")) {
-		SerialMon.println(F("GPRS SERVICE OK!!"));
-		return true;
-	}
+  if (strstr(buffer, "OK")) {
+    SerialMon.println(F("GPRS SERVICE OK!!"));
+    return true;
+  }
 
-	SerialMon.println(F("ERROR GPS SERVICE!!"));
-	return false;
+  SerialMon.println(F("ERROR GPS SERVICE!!"));
+  return false;
 }
 
 // #############################################################################
@@ -1006,24 +1006,24 @@ void Trackio::_delay (int time) {
 // #############################################################################
 
 bool Trackio::sendCommand (char * cmd, char * validate) {
-	return Trackio::sendCommand(cmd, validate, 0);
+  return Trackio::sendCommand(cmd, validate, 0);
 }
 
 bool Trackio::sendCommand (char * cmd, int time) {
-	return Trackio::sendCommand(cmd, NULL, time);
+  return Trackio::sendCommand(cmd, NULL, time);
 }
 
 bool Trackio::sendCommand (char * cmd) {
-	return Trackio::sendCommand(cmd, NULL, 0);
+  return Trackio::sendCommand(cmd, NULL, 0);
 }
 
 bool Trackio::sendCommand (char *cmd, char * validate, int time) {
-	int count = 0;
+  int count = 0;
   int indexPosition = 0;
 
   while (SerialSim.available()) SerialSim.read();
 
-	// vaciamos el buffer previo
+  // vaciamos el buffer previo
   strcpy(buffer, "");
 
   if (__DEBUG) {
@@ -1031,13 +1031,13 @@ bool Trackio::sendCommand (char *cmd, char * validate, int time) {
     SerialMon.print(F("SerialSim > ")); SerialMon.println(cmd);
   }
 
-	// enviamos el comando al modem
+  // enviamos el comando al modem
   SerialSim.println(cmd);
   SerialSim.flush();
 
-	Trackio::_delay(time);
+  Trackio::_delay(time);
 
-	// Esperamos respuesta comprobando el buffer cada 400 millis
+  // Esperamos respuesta comprobando el buffer cada 400 millis
   Serial.println("Waiting modem response...");
   while (!SerialSim.available()) {
     SerialMon.print(F("."));
@@ -1056,7 +1056,7 @@ bool Trackio::sendCommand (char *cmd, char * validate, int time) {
 
   modemSerialsFails = 0; // reset contador
 
-	// acomodamos la respuesta en buffer
+  // acomodamos la respuesta en buffer
   while(SerialSim.available() > 0) {
     buffer[indexPosition] = SerialSim.read();
     indexPosition++;
@@ -1065,16 +1065,16 @@ bool Trackio::sendCommand (char *cmd, char * validate, int time) {
 
   if (__DEBUG) {
     SerialMon.println(buffer);
-	  SerialMon.println(F("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"));
+    SerialMon.println(F("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"));
   }
 
-	// comprobamos si hay datos que validar
-	if (validate != NULL && strlen(validate) >= 0) {
-		if (strstr(buffer, validate)) {
-			return true;
-		}
-		return false;
-	}
+  // comprobamos si hay datos que validar
+  if (validate != NULL && strlen(validate) >= 0) {
+    if (strstr(buffer, validate)) {
+      return true;
+    }
+    return false;
+  }
 
   return true;
 }

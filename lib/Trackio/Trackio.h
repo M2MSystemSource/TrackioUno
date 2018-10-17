@@ -947,41 +947,41 @@ class Trackio {
     // #########################################################################
 
     /**
-		 * Envía un comando por serial al modem. Se espera a recibir respuesta
-		 * y almacena el resultado en `buffer` (definida en Trackio.cpp).
-		 *
-		 * Utiliza el método `println` de la clase serial, no existe alternativa
-		 * para el método `print`, pero se puede acceder directamente al objeto
-		 * HardwareSerial con `SerialSim` en el main.cpp.
-		 *
-		 * @param cmd Comando a ejecutar, se utiliza println
-		 * @return true Si obtuvo respuesta
-		 * @return false
-		 */
+     * Envía un comando por serial al modem. Se espera a recibir respuesta
+     * y almacena el resultado en `buffer` (definida en Trackio.cpp).
+     *
+     * Utiliza el método `println` de la clase serial, no existe alternativa
+     * para el método `print`, pero se puede acceder directamente al objeto
+     * HardwareSerial con `SerialSim` en el main.cpp.
+     *
+     * @param cmd Comando a ejecutar, se utiliza println
+     * @return true Si obtuvo respuesta
+     * @return false
+     */
     bool sendCommand(char * cmd);
 
     bool sendCommand(const char * cmd);
 
 
-		/**
-		 * Version de sendCommand en la que se comprueba que la respuesta recibida
-		 * del comando AT contenga la cadena pasada por segundo parámetro. Es útil
-		 * para comprobar si tenemos OK o ERROR.
-		 *
-		 * Devuelve true si hay respuesta y contiene el segundo parametro, false
-		 * si no hay respuesta o no contiene el segundo parámetro
-		 *
-		 * @param cmd Comando a ejecutar, se utiliza println
-		 * @param res Respuesta que se espera que devuelva. Se utiliza `strcmp` para
+    /**
+     * Version de sendCommand en la que se comprueba que la respuesta recibida
+     * del comando AT contenga la cadena pasada por segundo parámetro. Es útil
+     * para comprobar si tenemos OK o ERROR.
+     *
+     * Devuelve true si hay respuesta y contiene el segundo parametro, false
+     * si no hay respuesta o no contiene el segundo parámetro
+     *
+     * @param cmd Comando a ejecutar, se utiliza println
+     * @param res Respuesta que se espera que devuelva. Se utiliza `strcmp` para
      *            la verificación
-		 * @return true Si obtuvo respuesta
-		 * @return false
-		 */
-		bool sendCommand(char * cmd, char * res);
+     * @return true Si obtuvo respuesta
+     * @return false
+     */
+    bool sendCommand(char * cmd, char * res);
 
-		// Especifica un tiempo antes de llamar a Serial.available()
-		bool sendCommand(char * cmd, char * res, int time);
-		bool sendCommand(char * cmd, int time);
+    // Especifica un tiempo antes de llamar a Serial.available()
+    bool sendCommand(char * cmd, char * res, int time);
+    bool sendCommand(char * cmd, int time);
 
   private:
 };
