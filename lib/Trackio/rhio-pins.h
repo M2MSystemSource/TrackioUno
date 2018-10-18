@@ -1,9 +1,6 @@
 #ifndef TRACKIO_PINS
   #define TRACKIO_PINS
 
-  #include <Arduino.h>
-  #include <SoftwareSerial.h>
-
   #ifdef DEIMOS_SOCKET1_MEGA2560
     #define GSM_PWREN  36 // IO00
     #define GSM_PWRKEY 33  // IO01
@@ -104,53 +101,78 @@
   #endif
 
   #ifdef PINS_ZEROSAMD21D
-    #define IO00 2
-    #define IO01 5
-    #define IO02 6
-    #define IO03 7
-    #define IO04 8
-    #define IO05 30
-    #define IO06 24
-    #define IO07 22
-    #define IO08 -1
-    #define IO09 -1
-    #define IO10 -1
-    #define IO11 -1
-    #define IO12 -1
-    #define IO13 -1
-    #define IO14 -1
-    #define IO15 -1
-    #define IO16 -1
-    #define IO17 -1
-    #define IOA0 A0
-    #define LED01 9
-  #endif
+    #define NMI 4
+    #define INT0 3
+    #define INT1 23
 
-  #ifdef PINS_UNO
-    #define NMI     2
-    #define _INT0   3
-    #define IO00    4
-    #define IO01    5
-    #define IO02    6
-    #define IO03    7
-    #define IO04    8
-    #define IO05    A0
-    #define IO06    A1
-    #define IO07    A2
-    #define LED01   9
-    #define PWM0    9
-    #define RXD     0
-    #define TXD     1
-    #define SDA     A4
-    #define SCL     A5
-    #define MOSI    11
-    #define MISO    12
-    #define SCK     13
-    #define CS0     10
-    #define _1WIRE  A3		// SJ4 must be closed & SJ1 must be open
-    #define AD0     A6
-    #define CAPT0   A7
-    #define RSTOUT  A3		// SJ1 must be closed & SJ4 must be open
-  #endif
+    #define IO0 2
+    #define IO1 5
+    #define IO2 6
+    #define IO3 7
+    #define IO4 8
+    //#define IO5  // PA27, pin not includded on Arduino IDE for original Zero
+    #define IO6 24
+    #define IO7 22
+
+    #define LED 9
+    #define PWM0 9
+    //#define PWM1  // PB03, pin not includded on Arduino IDE for original Zero
+
+    #define RXD 0
+    #define TXD 1
+    //#define RTS  // PA31, pin not includded on Arduino IDE for original Zero
+    //#define CTS  // PA30, pin not includded on Arduino IDE for original Zero
+    #define RXD1 31
+    #define TXD1 30
+
+    #define SDA 20
+    #define SCL 21
+    #define MOSI 35
+    #define MISO 34
+    #define SCK 37
+    #define CS0 10
+    #define CS1 A5     // MUX_SW=LOW required
+    #define MEM_CS A4  // MUX_SW=LOW required
+    #define uSD_CS A2  // MUX_SW=LOW required
+    //#define USB_P    // PA25, pin not includded on Arduino IDE for original Zero
+    //#define USB_N    // PA24, pin not includded on Arduino IDE for original Zero
+    #define _1WIRE A3  // MUX_SW=LOW required
+
+    #define AD0 A1
+    #define AD1 A4     // MUX_SW=HIGH required
+    #define AD2 A2     // MUX_SW=HIGH required
+    #define AD3 A5     // MUX_SW=HIGH required
+    #define DAC0 A0
+
+    #define MUX_SW 38 // ANALOG (MULTIPLEXOR) SWITCH
+    #define RSTOUT A3 // MUX_SW=HIGH required
+#endif
+
+#ifdef PINS_UNO
+#define NMI 2
+#define _INT0 3
+#define IO0 4
+#define IO1 5
+#define IO2 6
+#define IO3 7
+#define IO4 8
+#define IO5 A0
+#define IO6 A1
+#define IO7 A2
+#define LED01 9
+#define PWM0 9
+#define RXD 0
+#define TXD 1
+#define SDA A4
+#define SCL A5
+#define MOSI 11
+#define MISO 12
+#define SCK 13
+#define CS0 10
+#define _1WIRE A3 // SJ4 must be closed & SJ1 must be open
+#define AD0 A6
+#define CAPT0 A7
+#define RSTOUT A3 // SJ1 must be closed & SJ4 must be open
+#endif
 
 #endif

@@ -890,24 +890,6 @@ class Trackio {
     // #########################################################################
 
     /**
-     * @brief Establece la configuración del Watchdog a 8 segundos.
-     * delay interval patterns:
-     * 16 ms:     0b000000
-     * 500 ms:    0b000101
-     * 1 second:  0b000110
-     * 2 seconds: 0b000111
-     * 4 seconds: 0b100000
-     * 8 seconds: 0b100001
-     */
-    void configureSleep();
-
-    /**
-     * @brief
-     */
-    void sleepNow();
-    void sleepNow(float cycles);
-
-    /**
      * @brief Wrapper para el método delay() que incluye reset del watchdog
      *
      * Máximo 7.5 segundos (recomendable menos). Se realiza un reset antes y

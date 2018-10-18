@@ -38,13 +38,7 @@
  */
 
 #include <Arduino.h>
-#include <avr/wdt.h>
 #include "Trackio.h"
-
-#if defined(__AVR_ATmega328P__)
-  #include <SoftwareSerial.h>
-  SoftwareSerial SoftSerial(A5, A4);
-#endif
 
 Trackio trackio;
 
@@ -65,19 +59,10 @@ void transmitAlive();
 // #############################################################################
 
 /**
- * @brief La inicializaicón de la aplicación se
- * realiza en el modo OP_STARTUP. Echa un ojo a op_startup()
+ * @brief Configuramos el Watchdog. Nada más... el resto se hace en el loop.
  */
 void setup() {
-  // disable watchdog
-  // en los docs de microchip podemos encontrar un método similar:
-  // https://www.microchip.com/webdoc/AVRLibcReferenceManual/FAQ_1faq_softreset.html
-  MCUSR = 0;
-  wdt_disable();
-  delay(1); // relax...
 
-  trackio.configureSleep();
-  // while (1) {}
 }
 
 /**
@@ -131,7 +116,7 @@ void serialEvent() {
  * para realizar nuevamente la inicialización de la aplicación
  */
 void op_startup () {
-  digitalWrite(LED01, LOW);
+  digitalWrite(LED, LOW);
 
   if (!trackio.begin()) {
     SerialMon.println(F("Trackio Critical FAIL - SIM868 can't start"));
@@ -202,7 +187,7 @@ void op_auto () {
 void op_low () {
   trackio.getBattery();
   if (cfg.opmode == OP_LOW) {
-    trackio.sleepNow(32);
+
   }
 }
 
@@ -256,7 +241,7 @@ void checkCommand () {
   char ack[20];
   if (trackio.tcpHasCommand()) {
     if (trackio.processCommand(trackio.cmd)) {
-      sprintf(ack, "ack|%i", digitalRead(IO06));
+      sprintf(ack, "ack|%i", digitalRead(IO6));
       trackio.transmit(ack);
     }
   }

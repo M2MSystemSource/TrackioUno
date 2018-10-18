@@ -26,10 +26,6 @@
  */
 
 #include <Arduino.h>
-#include <avr/sleep.h>
-#include <avr/power.h>
-#include <avr/wdt.h>
-
 #include "Trackio.h"
 
 #define OK         (char *) "OK"
@@ -67,44 +63,6 @@ uint8_t modemSerialsFails = 0;
  */
 uint8_t openTcpFails = 0;
 
-/**
- * @brief Número de segundos que se irá a dormir (gneralmente gpsInterval)
- *
- * El método Trackio::sleepNow(int secs) establece los segundos. Este valor
- * se pasa a sleep_seconds_remaining la cual decrementa el número de segundos
- * dentro del macro ISR()
- */
-volatile int sleep_seconds_remaining;
-
-// interrupt raised by the watchdog firing
-// when the watchdog fires, this function will be executed
-// remember that interrupts are disabled in ISR functions
-// now we must check if the board is sleeping or if this is a genuine
-// interrupt (hanging)
-ISR(WDT_vect)
-{
-  // Check if we are in sleep mode or it is a genuine WDR.
-  if (sleep_seconds_remaining > 0) {
-    // not hang out, just waiting
-    // decrease the number of remaining avail loops
-    sleep_seconds_remaining = sleep_seconds_remaining - 1;
-    wdt_reset();
-  } else {
-    // must be rebooted
-    // configure
-    MCUSR = 0;                          // reset flags
-
-                                        // Put timer in reset-only mode:
-    WDTCSR |= 0b00011000;               // Enter config mode.
-    WDTCSR =  0b00001000 | 0b000000;    // clr WDIE (interrupt enable...7th from left)
-                                        // set WDE (reset enable...4th from left), and set delay interval
-                                        // reset system in 16 ms...
-                                        // unless wdt_disable() in loop() is reached first
-
-    // reboot
-    while(1);
-  }
-}
 
 bool Trackio::begin() {
   Trackio::configure();
@@ -119,7 +77,7 @@ bool Trackio::begin() {
 
   Trackio::loadConf();
 
-  digitalWrite(LED01, LOW);
+  digitalWrite(LED, LOW);
 
   if (!Trackio::powerOn()) {
     return false;
@@ -132,17 +90,15 @@ bool Trackio::begin() {
 
 void Trackio::configure () {
   // onboard led
-  pinMode(LED01, OUTPUT);
-  digitalWrite(LED01, HIGH);
+  pinMode(LED, OUTPUT);
+  digitalWrite(LED, HIGH);
 
   // control del simcom
   pinMode(GSM_PWRKEY, OUTPUT);
   pinMode(GSM_PWREN, OUTPUT);
   pinMode(GPS_EN, OUTPUT);
   pinMode(GSM_STATUS, INPUT);
-  pinMode(IO04, OUTPUT);
-  pinMode(IO05, INPUT);
-  pinMode(IO06, OUTPUT); // actuador externo (rele, led...)
+  pinMode(IO6, OUTPUT); // actuador externo (rele, led...)
 
   Trackio::_delay(1000);
 
@@ -150,33 +106,26 @@ void Trackio::configure () {
 }
 
 void Trackio::loadConf () {
-  eeprom_read_block((void*)&cfg, (void*)0, sizeof(cfg));
 
-  if (cfg.eeprom != RH_configVersion) {
-    SerialMon.println(F("Caragando configuración por primera vez..."));
-
-    // RECUERDA! Si realizas un cambio aquí, modifica la variable configVersion,
-    // al inicio de este archivo, para asegurar que los cambios se aplican
-    cfg.battMode = RH_battMode;
-    cfg.deepSleep = RH_deepSleep;
-    cfg.eeprom = RH_eeprom;
-    cfg.gpsInterval = RH_gpsInterval; // multiplicado por cfg.transmissionClock
-    cfg.opmode = RH_opmode;
-    cfg.primaryOpMode = RH_primaryOpMode;
-    cfg.sleep = RH_sleep;
-    cfg.transmissionClock = RH_transmissionClock;
-    cfg.requiredVbat = RH_requiredVbat;
-    cfg.requiredVin = RH_requiredVin;
-    cfg.requiredVsys5v = RH_requiredVsys5v;
-
-    eeprom_write_block((const void*)&cfg, (void*)0, sizeof(cfg));
-  }
+  // RECUERDA! Si realizas un cambio aquí, modifica la variable configVersion,
+  // al inicio de este archivo, para asegurar que los cambios se aplican
+  cfg.battMode = RH_battMode;
+  cfg.deepSleep = RH_deepSleep;
+  cfg.eeprom = RH_eeprom;
+  cfg.gpsInterval = RH_gpsInterval; // multiplicado por cfg.transmissionClock
+  cfg.opmode = RH_opmode;
+  cfg.primaryOpMode = RH_primaryOpMode;
+  cfg.sleep = RH_sleep;
+  cfg.transmissionClock = RH_transmissionClock;
+  cfg.requiredVbat = RH_requiredVbat;
+  cfg.requiredVin = RH_requiredVin;
+  cfg.requiredVsys5v = RH_requiredVsys5v;
 
   SerialMon.println(F("Configuración cargada"));
 }
 
 void Trackio::saveConf () {
-  eeprom_write_block((const void*)&cfg, (void*)0, sizeof(cfg));
+
 }
 
 bool Trackio::powerOn () {
@@ -186,7 +135,7 @@ bool Trackio::powerOn () {
   Trackio::_delay(1000);
   digitalWrite(GSM_PWREN, HIGH);
 
-  digitalWrite(LED01, HIGH);
+  digitalWrite(LED, HIGH);
 
   for (char i=0; i<5; i++) {
     gsm_status = digitalRead(GSM_STATUS);
@@ -194,7 +143,7 @@ bool Trackio::powerOn () {
       SerialMon.println(F("GSM HIGH!!"));
       break;
     } else {
-      digitalWrite(LED01, !digitalRead(LED01));
+      digitalWrite(LED, !digitalRead(LED));
       SerialMon.println(F("GSM LOW!"));
       digitalWrite(GSM_PWRKEY, HIGH);
       Trackio::_delay(1500);
@@ -203,7 +152,7 @@ bool Trackio::powerOn () {
     }
   }
 
-  digitalWrite(LED01, LOW);
+  digitalWrite(LED, LOW);
 
   if (!gsm_status) {
     // No se ha podido encender el modem. Revisar que GSM_PWREN, GSM_STATUS y
@@ -221,7 +170,7 @@ bool Trackio::powerOn () {
 
 void Trackio::powerOff () {
   SerialMon.println("POWEROFF!");
-  digitalWrite(LED01, LOW);
+  digitalWrite(LED, LOW);
 
   digitalWrite(GSM_PWREN, LOW);
   Trackio::_delay(100);
@@ -466,7 +415,7 @@ void Trackio::closeTcp (int mode) {
   sprintf(cmd, "AT+CIPCLOSE=%i", mode);
   Trackio::sendCommand(cmd);
   Trackio::tcpOk = false;
-  digitalWrite(LED01, LOW);
+  digitalWrite(LED, LOW);
 }
 
 bool Trackio::tcpIsOpen () {
@@ -491,7 +440,7 @@ bool Trackio::sayHello () {
   if (Trackio::tcpOk && Trackio::transmit(hello)) {
     SerialMon.print(F("buffer: ")); SerialMon.println(buffer);
     cfg.opmode = cfg.primaryOpMode;
-    digitalWrite(LED01, HIGH);
+    digitalWrite(LED, HIGH);
     return true;
   }
 
@@ -669,8 +618,8 @@ bool Trackio::processCommand (char * cmd) {
   // damos por hecho que es válido (luego se verá)
   bool isValidCmd = true;
 
-  if      (strcmp(command.property, "IO6") == 0) return Trackio::cmd_setIO(IO06, command.value);
-  else if (strcmp(command.property, "IO7") == 0) return Trackio::cmd_setIO(IO07, command.value);
+  if      (strcmp(command.property, "IO6") == 0) return Trackio::cmd_setIO(IO6, command.value);
+  else if (strcmp(command.property, "IO7") == 0) return Trackio::cmd_setIO(IO7, command.value);
   else if (strcmp(command.property, "MOSI") == 0) return Trackio::cmd_setIO(MOSI, command.value);
   else if (strcmp(command.property, "MISO") == 0) return Trackio::cmd_setIO(MISO, command.value);
   else if (strcmp(command.property, "CFG") == 0)  return Trackio::cmd_setConf(command.value);
@@ -931,76 +880,11 @@ void Trackio::parseGps (char * gps) {
 }
 
 // #############################################################################
-void Trackio::sleepNow () {
-  Trackio::sleepNow(cfg.gpsInterval);
-}
-
-void Trackio::sleepNow (float seconds) {
-  float cycles = seconds / 8;
-  SerialMon.println(F("-------------- SLEEP NOW --------------"));
-
-  sleep_seconds_remaining = cycles; // defines how many cycles should sleep
-
-  // Set sleep to full power down.  Only external interrupts or
-  // the watchdog timer can wake the CPU!
-  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-
-  // Turn off the ADC while asleep.
-  power_adc_disable();
-
-  if (cfg.deepSleep) Trackio::powerOff();
-
-  while (sleep_seconds_remaining > 0) { // while some cycles left, sleep!
-    SerialMon.print(F(" REMAINING:")); SerialMon.print(sleep_seconds_remaining);
-    // Enable sleep and enter sleep mode.
-    sleep_mode();
-
-    // CPU is now asleep and program execution completely halts!
-    // Once awake, execution will resume at this point if the
-    // watchdog is configured for resume rather than restart
-
-
-    // When awake, disable sleep mode
-    sleep_disable();
-  }
-
-  SerialMon.println(F(""));
-  SerialMon.println(F("-------------- WAKEUP --------------"));
-
-  // put everything on again
-  power_all_enable();
-}
-
-void Trackio::configureSleep () {
-  // SerialMon.println("Configure Watchdog / Sleep");
-
-  cli();                           // disable interrupts for changing the registers
-
-  MCUSR = 0;                       // reset status register flags
-
-                                   // Put timer in interrupt-only mode:
-  WDTCSR |= 0b00011000;            // Set WDCE (5th from left) and WDE (4th from left) to enter config mode,
-                                   // using bitwise OR assignment (leaves other bits unchanged).
-  WDTCSR =  0b01000000 | 0b100001; // set WDIE: interrupt enabled
-                                   // clr WDE: reset disabled
-                                   // and set delay interval (right side of bar) to X seconds
-  /*
-   * 16 ms:     0b000000
-   * 500 ms:    0b000101
-   * 1 second:  0b000110
-   * 2 seconds: 0b000111
-   * 4 seconds: 0b100000
-   * 8 seconds: 0b100001
-   */
-  sei();                           // re-enable interrupts
-}
-
-// #############################################################################
 
 void Trackio::_delay (int time) {
-  wdt_reset();
+
   delay(time);
-  wdt_reset();
+
 }
 
 // #############################################################################
