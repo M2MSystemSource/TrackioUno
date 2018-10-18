@@ -29,6 +29,9 @@
   * Gestión de acelerometro y alarma de movimiento
   * Otros arreglos y limpieza
 
+* **0.2.6 - 2018-10-18*
+  * FIX IO7, MOSI y MISO no estaban inicializadas como outputs
+
 * **0.2.5 - 2018-10-16**
   * Todos los valores de configuración se han transferido a `static-conf.h` para evitar modificaciones "innecesarias" en archivos CORE.
   * Añadidas 3 nuevos GPIOS configurables de forma remota, IO7, MOSI y MISO. Eliminada LED01 como configurable de forma remota
