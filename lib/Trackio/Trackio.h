@@ -29,7 +29,7 @@
 
 #ifndef TRACKIO
 #define TRACKIO
-#define VERSION "0.2.5"
+#define VERSION "0.2.6"
 
 #include <Arduino.h>
 #include "static-conf.h"
