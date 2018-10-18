@@ -143,6 +143,9 @@ void Trackio::configure () {
   pinMode(IO04, OUTPUT);
   pinMode(IO05, INPUT);
   pinMode(IO06, OUTPUT); // actuador externo (rele, led...)
+  pinMode(IO07, OUTPUT); // actuador externo (rele, led...)
+  pinMode(MISO, OUTPUT); // actuador externo (rele, led...)
+  pinMode(MOSI, OUTPUT); // actuador externo (rele, led...)
 
   Trackio::_delay(1000);
 
