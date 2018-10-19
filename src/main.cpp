@@ -40,6 +40,7 @@
 #include <Arduino.h>
 #include <avr/wdt.h>
 #include "Trackio.h"
+#include "TimerOne.h"
 
 #if defined(__AVR_ATmega328P__)
   #include <SoftwareSerial.h>
@@ -52,6 +53,7 @@ Trackio trackio;
 // no tener que esperar al timer para el envío de la primera posición
 byte firstPositionHasBeenSent = 0;
 
+// modos operacionales
 void op_startup();
 void op_tcp();
 void op_auto();
@@ -62,7 +64,14 @@ bool getGps(bool manageTcp);
 void checkCommand();
 void transmitAlive();
 
-// #############################################################################
+// Método para llamar al watchdog externo.
+// Este watchdog será complementario al watchdog interno del 328p para ofrecer
+// máxima seguridad ante posibles cuelgues del oscilador que incorpora el 328p.
+// (si este oscilador se cuelga (hang) se ven afectados tanto el micro como el
+// watchdog interno).
+// Se inicializa en el setup y se asigna a un timer de la librería TimerOne.h
+// que see ejecuta cada segundo.
+void externalWatchdogInterrupt();
 
 /**
  * @brief La inicializaicón de la aplicación se
@@ -74,10 +83,13 @@ void setup() {
   // https://www.microchip.com/webdoc/AVRLibcReferenceManual/FAQ_1faq_softreset.html
   MCUSR = 0;
   wdt_disable();
-  delay(1); // relax...
 
+  // Configure sleep
   trackio.configureSleep();
-  // while (1) {}
+
+  // configure timer
+  Timer1.initialize(1000000);
+  Timer1.attachInterrupt(externalWatchdogInterrupt);
 }
 
 /**
@@ -260,4 +272,12 @@ void checkCommand () {
       trackio.transmit(ack);
     }
   }
+}
+
+void externalWatchdogInterrupt() {
+  // pulso directo sobre pin PB5, que corresponde con SPI_CLK
+  DDRB = DDRB | B00100000;
+  PORTB = PORTB & B11011111;
+  firstPositionHasBeenSent = 1;
+  PORTB = PORTB | B00100000;
 }
