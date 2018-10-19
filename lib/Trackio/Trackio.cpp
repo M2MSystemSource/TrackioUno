@@ -220,7 +220,7 @@ bool Trackio::powerOn () {
 }
 
 void Trackio::powerOff () {
-  SerialMon.println("POWEROFF!");
+  SerialMon.println(F("POWEROFF!"));
   digitalWrite(LED01, LOW);
 
   digitalWrite(GSM_PWREN, LOW);
@@ -300,7 +300,7 @@ void Trackio::checkLowBattery () {
   if (low == 1) {
     // reset serial fails, evita reinicio antes de deep sleep
     modemSerialsFails = 0;
-    SerialMon.println("Entramos en LOW MODE");
+    SerialMon.println(F("Entramos en LOW MODE"));
     // establecemos el modo de bajo consumo y apagamos el simcom
     cfg.opmode = OP_LOW;
     Trackio::powerOff();
@@ -454,7 +454,7 @@ bool Trackio::openTcp () {
   SerialMon.println(F("ERROR TCP OPEN!"));
   openTcpFails++;
   if (openTcpFails == 3) {
-    SerialMon.println("El TCP ha fallado en multiples ocasiones - Hard Reset!");
+    SerialMon.println(F("El TCP ha fallado en multiples ocasiones - Hard Reset!"));
     while (1) {} // llamamos al watchdog.
   }
 
@@ -616,12 +616,9 @@ bool Trackio::tcpHasCommand () {
 
       if (35 == (int) x && !hasCommand) { // init command with #
         gettingCommand = true;
-        SerialMon.println("START command:");
       } else if (36 == (int) x) { // end command with $
         gettingCommand = false;
         hasCommand = true;
-        SerialMon.println("");
-        SerialMon.println("END command:");
         Trackio::cmd[counter] = '\0';
       } else if (gettingCommand) {
         SerialMon.print(x);
@@ -704,7 +701,7 @@ Command Trackio::splitCommand (char * cmd) {
 bool Trackio::isCommand (char * command) {
   char * split;
   uint8_t count = 0;
-  char cmd[50];
+  char cmd[20];
   strcpy(cmd, command);
 
   // primer y último caracter como # y $
@@ -726,8 +723,7 @@ bool Trackio::isCommand (char * command) {
 }
 
 char * Trackio::extractCommand (char * cmd) {
-  static char __cmd[50];
-  SerialMon.print(F("x")); SerialMon.print(cmd); SerialMon.println(F("x"));
+  static char __cmd[20];
 
   uint8_t len = strlen(cmd) - 1;
   int i;
@@ -1047,7 +1043,7 @@ bool Trackio::sendCommand (char *cmd, char * validate, int time) {
       SerialMon.println(F("sendSerialAt failed"));
       modemSerialsFails++;
       if (modemSerialsFails > 10) {
-        SerialMon.println("Muchos fallos, reiniciando en 8 secs, o pulsa botón reset...");
+        SerialMon.println(F("Muchos fallos, reiniciando en 8 secs, o pulsa botón reset..."));
         delay(10000);
       }
       return false;

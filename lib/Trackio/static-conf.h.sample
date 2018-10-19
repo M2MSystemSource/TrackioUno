@@ -34,8 +34,6 @@
 #define RH_APN_PASS "xxx"
 #define RH_SERVER "xxx"
 #define RH_PORT "xxx"
-// #define RH_SERVER "83.33.35.49"
-// #define RH_PORT "3135"
 
 // #####################################################
 // Pins para lectura analógica de baterías, cambian en función de la PCB y/o MCU
