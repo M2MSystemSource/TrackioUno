@@ -29,7 +29,7 @@
 
 #ifndef TRACKIO
 #define TRACKIO
-#define VERSION "0.2.5"
+#define VERSION "0.2.7"
 
 #include <Arduino.h>
 #include "static-conf.h"
@@ -233,19 +233,26 @@ class Trackio {
        * desde la última medición. Trackio::Timers.base solo se inicializa cuando
        * se sincroniza el relog con el servidor, en el método Trackio::sayHello()
        *
-       * Hasta que Trackio::Timers.base no se inicialice el resto de relojes (timer1, timer,2 ...)
-       * tampoco lo hará
+       * Hasta que Trackio::Timers.base no se inicialice el resto de relojes
+       * (timer1, timer,2 ...) tampoco lo hará
        */
       unsigned long base;
 
       /**
        * @brief Timer para obtener posición GPS
        *
-       * Utiliza baseTimer como comparador y trackio.conf.gpsInterval para establecer
-       * el tiempo
+       * Utiliza baseTimer como comparador y trackio.conf.gpsInterval para
+       * establecer el tiempo
        */
       unsigned long transmissionClock;
     } timers {0, 0};
+
+    /**
+     * @brief Ejecuta un blink de 100ms con las repeticiones indicadas en time.
+     *
+     * @param times
+     */
+    void blink(uint8_t times, uint8_t ms);
 
     /**
      * @brief Almacena el voltaje de la batería interna (VBAT)

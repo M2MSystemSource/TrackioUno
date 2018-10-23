@@ -1,4 +1,14 @@
 # Changelog
+* **0.2.7 - 2018-10-23**
+  * Soporte para watchdog externo. Se utiliza el Timer1 (hardware) que realiza un pulso de 1/2µs sobre la línea SPI_CLK para evitar el reset. Permite el reset en caso de que el cristal del micro (oscilador) se quede colgado (lo cual colgaría tambien el watchdog interno). Se mantiene el watchdog interno a 8 secs para forzar reset por software si necesario.
+  * Nuevo método Trackio::blink() da 3 pulsos de 100ms sobre LED01 para indicar reset del sistema. Se elimina cualquier otro blink.
+  * Se elimina primaryOpMode como parámetro configurable de forma remota.
+
+
+* **0.2.6 - 2018-10-18**
+  * FIX IO7, MOSI y MISO no estaban inicializadas como outputs
+
+
 * **0.2.5 - 2018-10-16**
   * Todos los valores de configuración se han transferido a `static-conf.h` para evitar modificaciones "innecesarias" en archivos CORE.
   * Añadidas 3 nuevos GPIOS configurables de forma remota, IO7, MOSI y MISO. Eliminada LED01 como configurable de forma remota

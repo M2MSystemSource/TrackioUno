@@ -53,6 +53,9 @@ Trackio trackio;
 // no tener que esperar al timer para el envío de la primera posición
 byte firstPositionHasBeenSent = 0;
 
+int timeroneCounter1 = 0;
+int timeroneCounter2 = 0;
+
 // modos operacionales
 void op_startup();
 void op_tcp();
@@ -87,7 +90,6 @@ void setup() {
   // Configure sleep
   trackio.configureSleep();
 
-  // configure timer
   Timer1.initialize(1000000);
   Timer1.attachInterrupt(externalWatchdogInterrupt);
 }
@@ -278,6 +280,11 @@ void externalWatchdogInterrupt() {
   // pulso directo sobre pin PB5, que corresponde con SPI_CLK
   DDRB = DDRB | B00100000;
   PORTB = PORTB & B11011111;
-  firstPositionHasBeenSent = 1;
-  PORTB = PORTB | B00100000;
+
+  // necesitamos un microsegundo
+  for (timeroneCounter1 = 0; timeroneCounter1 < 1; timeroneCounter1++) {
+    for (timeroneCounter2 = 0; timeroneCounter2 < 1; timeroneCounter2++) {}
+  }
+
+    PORTB = PORTB | B00100000;
 }

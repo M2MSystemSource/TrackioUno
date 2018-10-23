@@ -116,10 +116,9 @@ bool Trackio::begin() {
   SerialMon.print(F("- Trackio "));
   SerialMon.print(F(VERSION));
   SerialMon.println(F(" START -"));
+  Trackio::blink(3);
 
   Trackio::loadConf();
-
-  digitalWrite(LED01, LOW);
 
   if (!Trackio::powerOn()) {
     return false;
@@ -128,6 +127,17 @@ bool Trackio::begin() {
   Trackio::transmissionClockCounter = 0;
   Trackio::printInfo();
   return true;
+}
+
+void Trackio::blink (uint8_t times) {
+  digitalWrite(LED01, LOW);
+
+  while (times--) {
+    digitalWrite(LED01, HIGH);
+    Trackio::_delay(200);
+    digitalWrite(LED01, LOW);
+    Trackio::_delay(200);
+  }
 }
 
 void Trackio::configure () {
@@ -143,8 +153,11 @@ void Trackio::configure () {
   pinMode(IO04, OUTPUT);
   pinMode(IO05, INPUT);
   pinMode(IO06, OUTPUT); // actuador externo (rele, led...)
+  pinMode(IO07, OUTPUT); // actuador externo (rele, led...)
+  pinMode(MISO, OUTPUT); // actuador externo (rele, led...)
+  pinMode(MOSI, OUTPUT); // actuador externo (rele, led...)
 
-  Trackio::_delay(1000);
+  Trackio::_delay(100);
 
   SerialMon.println(F("Configure OK"));
 }
@@ -186,15 +199,12 @@ bool Trackio::powerOn () {
   Trackio::_delay(1000);
   digitalWrite(GSM_PWREN, HIGH);
 
-  digitalWrite(LED01, HIGH);
-
   for (char i=0; i<5; i++) {
     gsm_status = digitalRead(GSM_STATUS);
     if (gsm_status== HIGH){
       SerialMon.println(F("GSM HIGH!!"));
       break;
     } else {
-      digitalWrite(LED01, !digitalRead(LED01));
       SerialMon.println(F("GSM LOW!"));
       digitalWrite(GSM_PWRKEY, HIGH);
       Trackio::_delay(1500);
@@ -202,8 +212,6 @@ bool Trackio::powerOn () {
       Trackio::_delay(1500);
     }
   }
-
-  digitalWrite(LED01, LOW);
 
   if (!gsm_status) {
     // No se ha podido encender el modem. Revisar que GSM_PWREN, GSM_STATUS y
@@ -729,7 +737,6 @@ char * Trackio::extractCommand (char * cmd) {
   int i;
 
   for (i = 1; i < len; i++) {
-
     if ((int) cmd[i] != 35 && (int) cmd[i] != 36) {
       SerialMon.print(F("Extract Command i: ")); SerialMon.println(cmd[i]);
       __cmd[i] = '\0';
@@ -783,6 +790,8 @@ bool Trackio::applyConf (char * conf) {
   char prop[10];
   char value[5];
 
+  // copiamos...
+  // AT328p: todo se muere si aplico el strtok directamente sobre conf*
   strcpy(x, conf);
 
   cmd = strtok(x, ":");
@@ -795,7 +804,6 @@ bool Trackio::applyConf (char * conf) {
   if      (strcmp(prop, "dslp") == 0) cfg.deepSleep = atoi(value);
   else if (strcmp(prop, "gpsi") == 0) cfg.gpsInterval = atoi(value);
   else if (strcmp(prop, "op") == 0)   cfg.opmode = atoi(value);
-  else if (strcmp(prop, "pop") == 0)  cfg.primaryOpMode = atoi(value);
   else if (strcmp(prop, "slp") == 0)  cfg.sleep = atoi(value);
 
   return true;
@@ -940,6 +948,8 @@ void Trackio::sleepNow (float seconds) {
   // Set sleep to full power down.  Only external interrupts or
   // the watchdog timer can wake the CPU!
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+  // SLEEP_MODE_IDLE para mantener habilitado los timers
+  // set_sleep_mode(SLEEP_MODE_IDLE);
 
   // Turn off the ADC while asleep.
   power_adc_disable();
@@ -947,7 +957,7 @@ void Trackio::sleepNow (float seconds) {
   if (cfg.deepSleep) Trackio::powerOff();
 
   while (sleep_seconds_remaining > 0) { // while some cycles left, sleep!
-    SerialMon.print(F(" REMAINING:")); SerialMon.print(sleep_seconds_remaining);
+    SerialMon.print(F(","));
     // Enable sleep and enter sleep mode.
     sleep_mode();
 
@@ -968,8 +978,6 @@ void Trackio::sleepNow (float seconds) {
 }
 
 void Trackio::configureSleep () {
-  // SerialMon.println("Configure Watchdog / Sleep");
-
   cli();                           // disable interrupts for changing the registers
 
   MCUSR = 0;                       // reset status register flags
@@ -1034,7 +1042,6 @@ bool Trackio::sendCommand (char *cmd, char * validate, int time) {
 	Trackio::_delay(time);
 
 	// Esperamos respuesta comprobando el buffer cada 400 millis
-  Serial.println("Waiting modem response...");
   while (!SerialSim.available()) {
     SerialMon.print(F("."));
     Trackio::_delay(100);
