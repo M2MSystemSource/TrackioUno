@@ -1,4 +1,8 @@
 # Changelog
+* **0.2.8. - 2018-10-23**
+  * FIX IO7 se utiliza para medición de VIN y no puede ser de tipo OUTPUT
+  * FIX eliminado param extra de blink
+
 * **0.2.7 - 2018-10-23**
   * Soporte para watchdog externo. Se utiliza el Timer1 (hardware) que realiza un pulso de 1/2µs sobre la línea SPI_CLK para evitar el reset. Permite el reset en caso de que el cristal del micro (oscilador) se quede colgado (lo cual colgaría tambien el watchdog interno). Se mantiene el watchdog interno a 8 secs para forzar reset por software si necesario.
   * Nuevo método Trackio::blink() da 3 pulsos de 100ms sobre LED01 para indicar reset del sistema. Se elimina cualquier otro blink.

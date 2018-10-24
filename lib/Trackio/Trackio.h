@@ -29,7 +29,7 @@
 
 #ifndef TRACKIO
 #define TRACKIO
-#define VERSION "0.2.7"
+#define VERSION "0.2.8"
 
 #include <Arduino.h>
 #include "static-conf.h"
@@ -252,7 +252,7 @@ class Trackio {
      *
      * @param times
      */
-    void blink(uint8_t times, uint8_t ms);
+    void blink(uint8_t times);
 
     /**
      * @brief Almacena el voltaje de la batería interna (VBAT)

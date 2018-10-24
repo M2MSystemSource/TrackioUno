@@ -153,7 +153,6 @@ void Trackio::configure () {
   pinMode(IO04, OUTPUT);
   pinMode(IO05, INPUT);
   pinMode(IO06, OUTPUT); // actuador externo (rele, led...)
-  pinMode(IO07, OUTPUT); // actuador externo (rele, led...)
   pinMode(MISO, OUTPUT); // actuador externo (rele, led...)
   pinMode(MOSI, OUTPUT); // actuador externo (rele, led...)
 
@@ -675,7 +674,6 @@ bool Trackio::processCommand (char * cmd) {
   bool isValidCmd = true;
 
   if      (strcmp(command.property, "IO6") == 0) return Trackio::cmd_setIO(IO06, command.value);
-  else if (strcmp(command.property, "IO7") == 0) return Trackio::cmd_setIO(IO07, command.value);
   else if (strcmp(command.property, "MOSI") == 0) return Trackio::cmd_setIO(MOSI, command.value);
   else if (strcmp(command.property, "MISO") == 0) return Trackio::cmd_setIO(MISO, command.value);
   else if (strcmp(command.property, "CFG") == 0)  return Trackio::cmd_setConf(command.value);
