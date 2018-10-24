@@ -958,6 +958,10 @@ class Trackio {
 
     // #########################################################################
 
+    void sleepNow(uint8_t times);
+
+    // #########################################################################
+
     /**
      * Envía un comando por serial al modem. Se espera a recibir respuesta
      * y almacena el resultado en `buffer` (definida en Trackio.cpp).

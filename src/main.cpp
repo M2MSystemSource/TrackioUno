@@ -190,7 +190,7 @@ void op_auto () {
 void op_low () {
   trackio.getBattery();
   if (cfg.opmode == OP_LOW) {
-
+    trackio.sleepNow(4);
   }
 }
 
@@ -208,7 +208,6 @@ bool getGps (bool manageTcp) {
   }
 
   trackio.listeningTcp = false;
-
   trackio.transmissionClockCounter = 0;
 
   if (manageTcp && !trackio.tcpIsOpen()) {

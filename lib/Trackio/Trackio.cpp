@@ -258,44 +258,40 @@ void Trackio::getAnalogBattery() {
   lectura_mV = Trackio::readAnalogBatt(A0);
   aux_f = (float) (lectura_mV / aux_bat);
   result = (uint16_t) aux_f;
-  Trackio::vsys_5v = result;
   _("A0: "); _(result);
 
   // --
   lectura_mV = Trackio::readAnalogBatt(A1);
   aux_f = (float) (lectura_mV / aux_bat);
   result = (uint16_t) aux_f - 100L;
-  Trackio::vbat = result;
-  _(" - A1: "); _(result);
+  Trackio::vsys_5v = result;
+  _(" - A1 (VSYS): "); _(result);
 
   // --
   lectura_mV = Trackio::readAnalogBatt(A2);
   aux_f = (float) (lectura_mV / aux_ext_bat);
   result = (uint16_t) aux_f;
-  Trackio::vin = result;
-  _(" - A2: "); __(result);
-  __(F(""));
+  _(" - A2: "); _(result);
 
   // --
   lectura_mV = Trackio::readAnalogBatt(A3);
   aux_f = (float) (lectura_mV / aux_ext_bat);
   result = (uint16_t) aux_f;
-  Trackio::vin = result;
-  _(" - A3: "); __(result);
+  Trackio::vbat = result;
+  _(" - A3 (VBAT): "); _(result);
 
   // --
   lectura_mV = Trackio::readAnalogBatt(A4);
   aux_f = (float) (lectura_mV / aux_ext_bat);
   result = (uint16_t) aux_f;
-  Trackio::vin = result;
-  _(" - A4: "); __(result);__(F(""));
+  _(" - A4: "); _(result);
 
   // --
   lectura_mV = Trackio::readAnalogBatt(A5);
   aux_f = (float) (lectura_mV / aux_ext_bat);
   result = (uint16_t) aux_f;
   Trackio::vin = result;
-  _(" - A5: "); __(result);
+  _(" - A5 (VIN): "); __(result);
   __(F(""));
 }
 
@@ -890,6 +886,17 @@ void Trackio::blink (uint8_t times, uint8_t ms) {
 
 void Trackio::blink () {
   Trackio::blink(3, 200);
+}
+
+// #############################################################################
+
+void Trackio::sleepNow(uint8_t times) {
+  __(F("------- SLEEP NOW -------"));
+  while (times--) {
+    _(F("REMAINING: ")); __(times);
+    Watchdog.sleep(8000);
+  }
+  __(F("------- WAKEUP -------"));
 }
 
 // #############################################################################
