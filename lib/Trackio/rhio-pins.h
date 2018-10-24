@@ -138,7 +138,7 @@
   //#define USB_N    // PA24, pin not includded on Arduino IDE for original Zero
   #define _1WIRE A3  // MUX_SW=LOW required
 
-  #define AD0 A6
+  // #define AD0 A6
   #define AD1 A4     // MUX_SW=HIGH required
   #define AD2 A2     // MUX_SW=HIGH required
   #define AD3 A5     // MUX_SW=HIGH required

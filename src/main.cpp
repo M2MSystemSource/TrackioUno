@@ -38,6 +38,7 @@
  */
 
 #include <Arduino.h>
+#include <Adafruit_SleepyDog.h>
 #include "Trackio.h"
 
 Trackio trackio;
@@ -62,7 +63,7 @@ void transmitAlive();
  * @brief Configuramos el Watchdog. Nada más... el resto se hace en el loop.
  */
 void setup() {
-
+  Watchdog.enable(8000);
 }
 
 /**
@@ -100,6 +101,7 @@ void serialEvent() {
   SerialMon.println("TENEMOS COSAS!!");
   checkCommand();
 }
+
 
 // #############################################################################
 
@@ -171,6 +173,7 @@ void op_startup () {
  * Trackio::timers.gps()
  */
 void op_tcp () {
+  checkCommand();
   transmitAlive();
   getGps(false); // obtiene GPS y envía posición a servidor
 }
@@ -204,6 +207,8 @@ bool getGps (bool manageTcp) {
     return false;
   }
 
+  trackio.listeningTcp = false;
+
   trackio.transmissionClockCounter = 0;
 
   if (manageTcp && !trackio.tcpIsOpen()) {
@@ -231,6 +236,7 @@ void transmitAlive () {
       return;
     }
 
+    trackio.listeningTcp = false;
     if ((int) cfg.opmode == (int) OP_TCP) {
       trackio.transmit((char *) "%");
     }
@@ -238,6 +244,8 @@ void transmitAlive () {
 }
 
 void checkCommand () {
+  if (!trackio.listeningTcp) return;
+
   char ack[20];
   if (trackio.tcpHasCommand()) {
     if (trackio.processCommand(trackio.cmd)) {

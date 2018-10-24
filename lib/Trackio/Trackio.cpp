@@ -26,6 +26,7 @@
  */
 
 #include <Arduino.h>
+#include <Adafruit_SleepyDog.h>
 #include "Trackio.h"
 
 #define OK         (char *) "OK"
@@ -65,19 +66,15 @@ uint8_t openTcpFails = 0;
 
 
 bool Trackio::begin() {
-  Trackio::configure();
+  Trackio::configureIOs();
 
-  SerialMon.begin(9600);
-  SerialSim.begin(9600);
-  delay(100);
+  SerialMon.begin(38400); while (!SerialMon) {}
+  SerialSim.begin(38400); while (!SerialSim) {}
 
-  SerialMon.print(F("- Trackio "));
-  SerialMon.print(F(VERSION));
-  SerialMon.println(F(" START -"));
+  _(F("- Trackio ")); _(F(VERSION)); __(F(" START -"));
 
+  Trackio::blink();
   Trackio::loadConf();
-
-  digitalWrite(LED, LOW);
 
   if (!Trackio::powerOn()) {
     return false;
@@ -88,10 +85,9 @@ bool Trackio::begin() {
   return true;
 }
 
-void Trackio::configure () {
+void Trackio::configureIOs () {
   // onboard led
   pinMode(LED, OUTPUT);
-  digitalWrite(LED, HIGH);
 
   // control del simcom
   pinMode(GSM_PWRKEY, OUTPUT);
@@ -99,10 +95,6 @@ void Trackio::configure () {
   pinMode(GPS_EN, OUTPUT);
   pinMode(GSM_STATUS, INPUT);
   pinMode(IO6, OUTPUT); // actuador externo (rele, led...)
-
-  Trackio::_delay(1000);
-
-  SerialMon.println(F("Configure OK"));
 }
 
 void Trackio::loadConf () {
@@ -121,7 +113,7 @@ void Trackio::loadConf () {
   cfg.requiredVin = RH_requiredVin;
   cfg.requiredVsys5v = RH_requiredVsys5v;
 
-  SerialMon.println(F("Configuración cargada"));
+  __(F("Configuración cargada"));
 }
 
 void Trackio::saveConf () {
@@ -135,24 +127,19 @@ bool Trackio::powerOn () {
   Trackio::_delay(1000);
   digitalWrite(GSM_PWREN, HIGH);
 
-  digitalWrite(LED, HIGH);
-
   for (char i=0; i<5; i++) {
     gsm_status = digitalRead(GSM_STATUS);
     if (gsm_status== HIGH){
-      SerialMon.println(F("GSM HIGH!!"));
+      __(F("GSM HIGH!!"));
       break;
     } else {
-      digitalWrite(LED, !digitalRead(LED));
-      SerialMon.println(F("GSM LOW!"));
+      __(F("GSM LOW!"));
       digitalWrite(GSM_PWRKEY, HIGH);
       Trackio::_delay(1500);
       digitalWrite(GSM_PWRKEY, LOW);
       Trackio::_delay(1500);
     }
   }
-
-  digitalWrite(LED, LOW);
 
   if (!gsm_status) {
     // No se ha podido encender el modem. Revisar que GSM_PWREN, GSM_STATUS y
@@ -169,7 +156,7 @@ bool Trackio::powerOn () {
 }
 
 void Trackio::powerOff () {
-  SerialMon.println("POWEROFF!");
+  __("POWEROFF!");
   digitalWrite(LED, LOW);
 
   digitalWrite(GSM_PWREN, LOW);
@@ -197,7 +184,7 @@ void Trackio::getImei () {
   splitImei = strtok(NULL, "\n");
   strncpy(imei, splitImei, 15);
 
-  SerialMon.print(F("IMEI: ")); SerialMon.println(imei);
+  _(F("IMEI: ")); __(imei);
 }
 
 void Trackio::printIccid () {
@@ -249,7 +236,7 @@ void Trackio::checkLowBattery () {
   if (low == 1) {
     // reset serial fails, evita reinicio antes de deep sleep
     modemSerialsFails = 0;
-    SerialMon.println("Entramos en LOW MODE");
+    __("Entramos en LOW MODE");
     // establecemos el modo de bajo consumo y apagamos el simcom
     cfg.opmode = OP_LOW;
     Trackio::powerOff();
@@ -268,26 +255,48 @@ void Trackio::getAnalogBattery() {
   float aux_f=0;
 
   // --
-  lectura_mV = Trackio::readAnalogBatt(VSYS_PIN);
+  lectura_mV = Trackio::readAnalogBatt(A0);
   aux_f = (float) (lectura_mV / aux_bat);
   result = (uint16_t) aux_f;
   Trackio::vsys_5v = result;
-  SerialMon.print("VSYS_5v: "); SerialMon.print(result);
+  _("A0: "); _(result);
 
   // --
-  lectura_mV = Trackio::readAnalogBatt(VBAT_PIN);
+  lectura_mV = Trackio::readAnalogBatt(A1);
   aux_f = (float) (lectura_mV / aux_bat);
   result = (uint16_t) aux_f - 100L;
   Trackio::vbat = result;
-  SerialMon.print(" - VBAT: "); SerialMon.print(result);
+  _(" - A1: "); _(result);
 
   // --
-  lectura_mV = Trackio::readAnalogBatt(VIN_PIN);
+  lectura_mV = Trackio::readAnalogBatt(A2);
   aux_f = (float) (lectura_mV / aux_ext_bat);
   result = (uint16_t) aux_f;
   Trackio::vin = result;
-  SerialMon.print(" - VIN: "); SerialMon.println(result);
-  SerialMon.println(F(""));
+  _(" - A2: "); __(result);
+  __(F(""));
+
+  // --
+  lectura_mV = Trackio::readAnalogBatt(A3);
+  aux_f = (float) (lectura_mV / aux_ext_bat);
+  result = (uint16_t) aux_f;
+  Trackio::vin = result;
+  _(" - A3: "); __(result);
+
+  // --
+  lectura_mV = Trackio::readAnalogBatt(A4);
+  aux_f = (float) (lectura_mV / aux_ext_bat);
+  result = (uint16_t) aux_f;
+  Trackio::vin = result;
+  _(" - A4: "); __(result);__(F(""));
+
+  // --
+  lectura_mV = Trackio::readAnalogBatt(A5);
+  aux_f = (float) (lectura_mV / aux_ext_bat);
+  result = (uint16_t) aux_f;
+  Trackio::vin = result;
+  _(" - A5: "); __(result);
+  __(F(""));
 }
 
 uint16_t Trackio::readAnalogBatt(byte adc_pin) {
@@ -311,14 +320,14 @@ void Trackio::printPin () {
 // #############################################################################
 bool Trackio::checkStatus () {
   if (!Trackio::checkModem()) {
-    SerialMon.println(F("FAIL checkModem"));
+    __(F("FAIL checkModem"));
     return false;
   }
 
   Trackio::getSignalStrength();
 
   if (!Trackio::checkCreg()) {
-    SerialMon.println(F("FAIL checkCreg"));
+    __(F("FAIL checkCreg"));
     return false;
   }
 
@@ -395,15 +404,15 @@ bool Trackio::openTcp () {
   // si ya está abierto Sim868 devolverá OK, sino READY CONNECT
   if (strstr(response, OK) || strstr(response, READY)) {
     openTcpFails = 0;
-    SerialMon.println(F("TCP OPEN OK!"));
+    __(F("TCP OPEN OK!"));
     Trackio::tcpOk = true;
     return true;
   }
 
-  SerialMon.println(F("ERROR TCP OPEN!"));
+  __(F("ERROR TCP OPEN!"));
   openTcpFails++;
   if (openTcpFails == 3) {
-    SerialMon.println("El TCP ha fallado en multiples ocasiones - Hard Reset!");
+    __("El TCP ha fallado en multiples ocasiones - Hard Reset!");
     while (1) {} // llamamos al watchdog.
   }
 
@@ -415,6 +424,7 @@ void Trackio::closeTcp (int mode) {
   sprintf(cmd, "AT+CIPCLOSE=%i", mode);
   Trackio::sendCommand(cmd);
   Trackio::tcpOk = false;
+  Trackio::listeningTcp = false;
   digitalWrite(LED, LOW);
 }
 
@@ -438,7 +448,7 @@ bool Trackio::sayHello () {
   sprintf(hello, "%s|%d", x, opmode);
 
   if (Trackio::tcpOk && Trackio::transmit(hello)) {
-    SerialMon.print(F("buffer: ")); SerialMon.println(buffer);
+    _(F("buffer: ")); __(buffer);
     cfg.opmode = cfg.primaryOpMode;
     digitalWrite(LED, HIGH);
     return true;
@@ -449,8 +459,7 @@ bool Trackio::sayHello () {
 }
 
 bool Trackio::transmit (char * msg) {
-  if (!Trackio::tcpOk) return false;
-
+  // comando para el mondo
   char cipsend[20];
   sprintf(cipsend, "AT+CIPSEND=%i", strlen(msg));
 
@@ -459,29 +468,31 @@ bool Trackio::transmit (char * msg) {
   Trackio::sendCommand(msg);
 
   if (strstr(buffer, "SEND OK")) {
-    SerialMon.println(F("SEND OK!!"));
+    __(F("SEND OK!!"));
     delay(100); // relax!
     // Comprobamos si el servidor nos ha devuelto una respuesta
     char * response = getTransmitResponse(buffer);
     if (isCommand(response)) {
-      SerialMon.print(F("response: ")); SerialMon.println(response);
+      _(F("response: ")); __(response);
       char * cmd = Trackio::extractCommand(response);
       if (Trackio::processCommand(cmd)) {
-        SerialMon.println(F("Command PROCESSED: ")); SerialMon.println(cmd);
+        __(F("Command PROCESSED: ")); __(cmd);
       }
     } else {
-      SerialMon.println(F("Response is not a commnand"));
+      __(F("Response is not a commnand"));
     }
 
     if (cfg.opmode == OP_TCP) {
-      SerialMon.println(F("Listening for TCP commands..."));
+      __(F("Listening for TCP commands..."));
+      Trackio::listeningTcp = true;
     }
 
     return true;
   }
 
+  Trackio::listeningTcp = false;
   Trackio::tcpOk = false;
-  SerialMon.println(F("ERROR SEND DATA!!"));
+  __(F("ERROR SEND DATA!!"));
   return false;
 }
 
@@ -492,43 +503,20 @@ bool Trackio::transmitGps () {
   Trackio::resetGpsData();
   Trackio::getGps();
 
-  if (cfg.opmode == OP_TCP) {
-    // en el modo bidireccional no enviamos el imei, el socket del servidor
-    // ya tiene almacenado este dato por lo que no es necesario enviarlo de
-    // forma recurrente
-    if (Trackio::gps.fix == 0) {
-      sprintf(gpsdata, "0,%s", Trackio::gsm);
-    } else {
-      sprintf(gpsdata, "1,%s,%s,%s,%s,%s,%s,%s,%s,%s",
-        Trackio::gps.time,
-        Trackio::gps.lat,
-        Trackio::gps.lon,
-        Trackio::gps.alt,
-        Trackio::gps.sog,
-        Trackio::gps.cog,
-        Trackio::gps.hdop,
-        Trackio::gps.sats,
-        Trackio::gsm
-      );
-    }
+  if (Trackio::gps.fix == 0) {
+    sprintf(gpsdata, "0,%s", Trackio::gsm);
   } else {
-    // En el modo OP_AUTO, que se cierra el TCP, el
-    if (Trackio::gps.fix == 0) {
-      sprintf(gpsdata, "%s|0,%s", Trackio::imei, Trackio::gsm);
-    } else {
-      sprintf(gpsdata, "%s|1,%s,%s,%s,%s,%s,%s,%s,%s,%s",
-        Trackio::imei,
-        Trackio::gps.time,
-        Trackio::gps.lat,
-        Trackio::gps.lon,
-        Trackio::gps.alt,
-        Trackio::gps.sog,
-        Trackio::gps.cog,
-        Trackio::gps.hdop,
-        Trackio::gps.sats,
-        Trackio::gsm
-      );
-    }
+    sprintf(gpsdata, "1,%s,%s,%s,%s,%s,%s,%s,%s,%s",
+      Trackio::gps.time,
+      Trackio::gps.lat,
+      Trackio::gps.lon,
+      Trackio::gps.alt,
+      Trackio::gps.sog,
+      Trackio::gps.cog,
+      Trackio::gps.hdop,
+      Trackio::gps.sats,
+      Trackio::gsm
+    );
   }
 
   // add battery
@@ -565,15 +553,15 @@ bool Trackio::tcpHasCommand () {
 
       if (35 == (int) x && !hasCommand) { // init command with #
         gettingCommand = true;
-        SerialMon.println("START command:");
+        __("START command:");
       } else if (36 == (int) x) { // end command with $
         gettingCommand = false;
         hasCommand = true;
-        SerialMon.println("");
-        SerialMon.println("END command:");
+        __("");
+        __("END command:");
         Trackio::cmd[counter] = '\0';
       } else if (gettingCommand) {
-        SerialMon.print(x);
+        _(x);
         Trackio::cmd[counter] = x;
         counter++;
       }
@@ -581,7 +569,7 @@ bool Trackio::tcpHasCommand () {
       Trackio::_delay(1);
     }
 
-    SerialMon.print("Command: "); SerialMon.println(Trackio::cmd);
+    _("Command: "); __(Trackio::cmd);
 
     if (hasCommand) {
       return true;
@@ -626,14 +614,14 @@ bool Trackio::processCommand (char * cmd) {
   else {
     // finalmente no es válido...
     isValidCmd = false;
-    SerialMon.print(F("UNKNOW COMMAND: ")); SerialMon.println(command.property);
+    _(F("UNKNOW COMMAND: ")); __(command.property);
   }
 
   return isValidCmd;
 }
 
 Command Trackio::splitCommand (char * cmd) {
-  SerialMon.print(F("splitCommand: ")); SerialMon.print(cmd);
+  _(F("splitCommand: ")); _(cmd);
   Command command;
 
   char * split;
@@ -644,8 +632,8 @@ Command Trackio::splitCommand (char * cmd) {
   split = strtok(NULL , "|");
   if (split != NULL) strcpy(command.value, split);
 
-  SerialMon.print(F(" | prop: ")); SerialMon.print(command.property);
-  SerialMon.print(F(" | value: ")); SerialMon.println(command.value);
+  _(F(" | prop: ")); _(command.property);
+  _(F(" | value: ")); __(command.value);
 
   return command;
 }
@@ -676,7 +664,7 @@ bool Trackio::isCommand (char * command) {
 
 char * Trackio::extractCommand (char * cmd) {
   static char __cmd[50];
-  SerialMon.print(F("x")); SerialMon.print(cmd); SerialMon.println(F("x"));
+  _(F("x")); _(cmd); __(F("x"));
 
   uint8_t len = strlen(cmd) - 1;
   int i;
@@ -684,13 +672,13 @@ char * Trackio::extractCommand (char * cmd) {
   for (i = 1; i < len; i++) {
 
     if ((int) cmd[i] != 35 && (int) cmd[i] != 36) {
-      SerialMon.print(F("Extract Command i: ")); SerialMon.println(cmd[i]);
+      _(F("Extract Command i: ")); __(cmd[i]);
       __cmd[i] = '\0';
       __cmd[i - 1] = cmd[i];
     }
   }
 
-  SerialMon.print(F("Extract Command: ")); SerialMon.println(__cmd);
+  _(F("Extract Command: ")); __(__cmd);
   return __cmd;
 }
 
@@ -706,7 +694,7 @@ bool Trackio::cmd_setIO (int IO, char * status) {
 }
 
 bool Trackio::cmd_setConf (char * command) {
-  SerialMon.print(F("setConf: ")); SerialMon.println(command);
+  _(F("setConf: ")); __(command);
   const uint8_t maxConfs = 3;
   char confs[maxConfs][20] = {};
   uint8_t count = 0;
@@ -730,7 +718,7 @@ bool Trackio::cmd_setConf (char * command) {
 }
 
 bool Trackio::applyConf (char * conf) {
-  SerialMon.print(F("applyConf: ")); SerialMon.println(conf);
+  _(F("applyConf: ")); __(conf);
   char * cmd;
   char x[50];
   char prop[10];
@@ -788,11 +776,11 @@ bool Trackio::gprsIsOpen () {
   Trackio::sendCommand(x2);
 
   if (strstr(buffer, "OK")) {
-    SerialMon.println(F("GPRS SERVICE OK!!"));
+    __(F("GPRS SERVICE OK!!"));
     return true;
   }
 
-  SerialMon.println(F("ERROR GPS SERVICE!!"));
+  __(F("ERROR GPS SERVICE!!"));
   return false;
 }
 
@@ -882,9 +870,26 @@ void Trackio::parseGps (char * gps) {
 // #############################################################################
 
 void Trackio::_delay (int time) {
-
+  Watchdog.reset();
   delay(time);
+  Watchdog.reset();
+}
 
+// #############################################################################
+
+void Trackio::blink (uint8_t times, uint8_t ms) {
+  digitalWrite(LED, LOW);
+
+  while (times--) {
+    digitalWrite(LED, HIGH);
+    Trackio::_delay(ms);
+    digitalWrite(LED, LOW);
+    Trackio::_delay(ms);
+  }
+}
+
+void Trackio::blink () {
+  Trackio::blink(3, 200);
 }
 
 // #############################################################################
@@ -911,8 +916,8 @@ bool Trackio::sendCommand (char *cmd, char * validate, int time) {
   strcpy(buffer, "");
 
   if (__DEBUG) {
-    SerialMon.println(F(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"));
-    SerialMon.print(F("SerialSim > ")); SerialMon.println(cmd);
+    __(F(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"));
+    _(F("SerialSim > ")); __(cmd);
   }
 
   // enviamos el comando al modem
@@ -924,14 +929,14 @@ bool Trackio::sendCommand (char *cmd, char * validate, int time) {
   // Esperamos respuesta comprobando el buffer cada 400 millis
   Serial.println("Waiting modem response...");
   while (!SerialSim.available()) {
-    SerialMon.print(F("."));
+    _(F("."));
     Trackio::_delay(100);
     count++;
     if (count > 100) {
-      SerialMon.println(F("sendSerialAt failed"));
+      __(F("sendSerialAt failed"));
       modemSerialsFails++;
       if (modemSerialsFails > 10) {
-        SerialMon.println("Muchos fallos, reiniciando en 8 secs, o pulsa botón reset...");
+        __("Muchos fallos, reiniciando en 8 secs, o pulsa botón reset...");
         delay(10000);
       }
       return false;
@@ -948,8 +953,8 @@ bool Trackio::sendCommand (char *cmd, char * validate, int time) {
   }
 
   if (__DEBUG) {
-    SerialMon.println(buffer);
-    SerialMon.println(F("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"));
+    __(buffer);
+    __(F("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"));
   }
 
   // comprobamos si hay datos que validar

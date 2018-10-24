@@ -29,11 +29,14 @@
 
 #ifndef TRACKIO
 #define TRACKIO
-#define VERSION "0.2.5"
+#define VERSION "0.3.0b"
 
 #include <Arduino.h>
 #include "static-conf.h"
 #include "rhio-pins.h"
+
+#define _ SerialMon.print
+#define __ SerialMon.println
 
 // OFFSETS para el cálculo en las lecturas analógicas de baterías
 const float mV_step_used = 0.00322265625;
@@ -301,6 +304,18 @@ class Trackio {
     bool tcpOk;
 
     /**
+     * @brief Se utiliza en main.c/checkCommand() para indicar si deben buscarse
+     * comandos TCP en SerialSim.
+     *
+     * Por defecto será false, al escribir en el socket se cambiará a TRUE.
+     * A partir de este momento se podrá acceder checkCommand().
+     *
+     * La idea es evitar realizar peticiones SerialSim.available() cuando no
+     * son necesarias (no se está escuchando el TCP)
+     */
+    bool listeningTcp;
+
+    /**
      * @brief Indica si se ha conseguido enviar el mensaje de presentación al server.
      *
      * Cuando se conecta con el servidor (se abre TCP) el micro escribará el IMEI
@@ -355,7 +370,7 @@ class Trackio {
     /**
      * @brief Establece el modo de las distintas entradas digitales
      */
-    void configure();
+    void configureIOs();
 
     /**
      * @brief Enciende el modem
@@ -925,6 +940,21 @@ class Trackio {
      * @brief Guarda la configuración de Trackio::Conf en memoria EEPROM
      */
     void saveConf();
+
+    // #########################################################################
+
+    /**
+     * @brief Realiza un blink de N ms durante N times
+     *
+     * @param times Número de veces
+     * @param ms  Duración entre blink en milis
+     */
+    void blink(uint8_t times, uint8_t ms);
+
+    /**
+     * @brief Realiza un 3 blinks con una duración de 200ms cada uno.
+     */
+    void blink();
 
     // #########################################################################
 
