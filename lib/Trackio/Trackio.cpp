@@ -26,6 +26,7 @@
  */
 
 #include <Arduino.h>
+#include <FlashStorage.h>
 #include <Adafruit_SleepyDog.h>
 #include "Trackio.h"
 
@@ -48,6 +49,8 @@ const float VIN_aux=0.0448901623686724;
 const float VSYS_aux=0.3197278911564626;
 
 struct Conf cfg;
+
+FlashStorage(my_flash_store, Conf);
 
 /**
  * @brief Almacena la lectura del Serial del modem. Se utiliza principalmente
@@ -116,25 +119,35 @@ void Trackio::configureIOs () {
 
 void Trackio::loadConf () {
 
-  // RECUERDA! Si realizas un cambio aquí, modifica la variable configVersion,
-  // al inicio de este archivo, para asegurar que los cambios se aplican
-  cfg.battMode = RH_battMode;
-  cfg.deepSleep = RH_deepSleep;
-  cfg.eeprom = RH_eeprom;
-  cfg.gpsInterval = RH_gpsInterval; // multiplicado por cfg.transmissionClock
-  cfg.opmode = RH_opmode;
-  cfg.primaryOpMode = RH_primaryOpMode;
-  cfg.sleep = RH_sleep;
-  cfg.transmissionClock = RH_transmissionClock;
-  cfg.requiredVbat = RH_requiredVbat;
-  cfg.requiredVin = RH_requiredVin;
-  cfg.requiredVsys5v = RH_requiredVsys5v;
+  Conf owner;
+  owner = my_flash_store.read();
 
-  __(F("Configuración cargada"));
+  if (owner.eeprom != RH_eeprom) {
+    __("Cargamos flash por primera vez");
+    // RECUERDA! No modifiques nada aquí, revisa `lib/trackio/static-conf.h`
+    cfg.battMode = RH_battMode;
+    cfg.deepSleep = RH_deepSleep;
+    cfg.eeprom = RH_eeprom;
+    cfg.gpsInterval = RH_gpsInterval;
+    cfg.opmode = RH_opmode;
+    cfg.primaryOpMode = RH_primaryOpMode;
+    cfg.sleep = RH_sleep;
+    cfg.transmissionClock = RH_transmissionClock;
+    cfg.requiredVbat = RH_requiredVbat;
+    cfg.requiredVin = RH_requiredVin;
+    cfg.requiredVsys5v = RH_requiredVsys5v;
+
+    Trackio::saveConf();
+  } else {
+    __("La configuración ya existe.");
+    cfg = owner;
+  }
+
+  __(F("Configuración cargada..."));
 }
 
 void Trackio::saveConf () {
-
+  my_flash_store.write(cfg);
 }
 
 bool Trackio::powerOn () {
@@ -489,7 +502,7 @@ bool Trackio::transmit (char * msg) {
 bool Trackio::transmitGps () {
   if (cfg.gpsInterval < 1) return false; // deshabilitado
 
-  char gpsdata[250];
+  char gpsdata[150];
   Trackio::resetGpsData();
   Trackio::getGps();
 
