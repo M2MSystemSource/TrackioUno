@@ -221,6 +221,7 @@ bool getGps (bool manageTcp) {
     return false;
   }
 
+  firstPositionHasBeenSent = 1;
   return true;
 }
 
@@ -228,6 +229,11 @@ void transmitAlive () {
   unsigned long clockTimerDiff = (trackio.timers.base - trackio.timers.transmissionClock);
   if (clockTimerDiff >= (cfg.transmissionClock * 1000L)) {
     trackio.timers.transmissionClock = trackio.timers.base;
+
+    if (firstPositionHasBeenSent == 0) {
+      trackio.transmissionClockCounter = (cfg.gpsInterval + 1);
+      return;
+    }
 
     trackio.transmissionClockCounter++;
     if (trackio.transmissionClockCounter >= cfg.gpsInterval) {
