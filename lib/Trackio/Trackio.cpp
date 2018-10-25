@@ -34,6 +34,19 @@
 #define READY      (char *) "READY"
 #define CONNECT_OK (char *) "CONNECT OK"
 
+// OFFSETS para el cálculo en las lecturas analógicas de baterías
+const float mV_step_5V=0.0048828125;
+const float mV_step_3V3=0.00322265625;
+const float mV_step_1V1=0.00107421875;
+float mV_step_used;
+
+float reading_mV;
+float aux_reading;
+
+const float VBAT_aux=0.3197278911564626;
+const float VIN_aux=0.0448901623686724;
+const float VSYS_aux=0.3197278911564626;
+
 struct Conf cfg;
 
 /**
@@ -95,6 +108,10 @@ void Trackio::configureIOs () {
   pinMode(GPS_EN, OUTPUT);
   pinMode(GSM_STATUS, INPUT);
   pinMode(IO6, OUTPUT); // actuador externo (rele, led...)
+  pinMode(MUX_SW, OUTPUT);
+  digitalWrite(MUX_SW, HIGH);
+
+  mV_step_used = mV_step_3V3;
 }
 
 void Trackio::loadConf () {
@@ -251,48 +268,25 @@ void Trackio::checkLowBattery () {
 }
 
 void Trackio::getAnalogBattery() {
-  uint16_t lectura_mV=0, result=0;
-  float aux_f=0;
+  uint16_t lectura_mV;
 
-  // --
-  lectura_mV = Trackio::readAnalogBatt(A0);
-  aux_f = (float) (lectura_mV / aux_bat);
-  result = (uint16_t) aux_f;
-  _("A0: "); _(result);
+  __(F("--------------------------------------------------------------"));
+  digitalWrite(MUX_SW,LOW);
+  delay(10);
+  lectura_mV = (float) Trackio::readAnalogBatt(A3);
+  Trackio::vbat = (float) (lectura_mV / VBAT_aux);
+  _(F("VBAT: ")); __(Trackio::vbat);
 
-  // --
-  lectura_mV = Trackio::readAnalogBatt(A1);
-  aux_f = (float) (lectura_mV / aux_bat);
-  result = (uint16_t) aux_f - 100L;
-  Trackio::vsys_5v = result;
-  _(" - A1 (VSYS): "); _(result);
+  lectura_mV = (float) Trackio::readAnalogBatt(A1);
+  Trackio::vsys_5v = (float) (lectura_mV / VSYS_aux);
+  _(F("VSYS: ")); __(Trackio::vsys_5v);
 
-  // --
-  lectura_mV = Trackio::readAnalogBatt(A2);
-  aux_f = (float) (lectura_mV / aux_ext_bat);
-  result = (uint16_t) aux_f;
-  _(" - A2: "); _(result);
-
-  // --
-  lectura_mV = Trackio::readAnalogBatt(A3);
-  aux_f = (float) (lectura_mV / aux_ext_bat);
-  result = (uint16_t) aux_f;
-  Trackio::vbat = result;
-  _(" - A3 (VBAT): "); _(result);
-
-  // --
-  lectura_mV = Trackio::readAnalogBatt(A4);
-  aux_f = (float) (lectura_mV / aux_ext_bat);
-  result = (uint16_t) aux_f;
-  _(" - A4: "); _(result);
-
-  // --
-  lectura_mV = Trackio::readAnalogBatt(A5);
-  aux_f = (float) (lectura_mV / aux_ext_bat);
-  result = (uint16_t) aux_f;
-  Trackio::vin = result;
-  _(" - A5 (VIN): "); __(result);
-  __(F(""));
+  digitalWrite(MUX_SW,HIGH);
+  delay(100);
+  lectura_mV = (float) Trackio::readAnalogBatt(A2);
+  Trackio::vin = (float) (lectura_mV / VIN_aux);
+  _(F("VIN: ")); __(Trackio::vin);
+  __("");
 }
 
 uint16_t Trackio::readAnalogBatt(byte adc_pin) {
@@ -303,7 +297,7 @@ uint16_t Trackio::readAnalogBatt(byte adc_pin) {
   readingADC = analogRead(adc_pin);
   readingADC = (int) readingADC;
   reading_mV = (float) readingADC * (float) mV_step_used;
-  reading_mV = (float) reading_mV *1000;
+  reading_mV = (float) reading_mV * 1000;
   result = (uint16_t) reading_mV;
   return(result);
 }
@@ -495,7 +489,7 @@ bool Trackio::transmit (char * msg) {
 bool Trackio::transmitGps () {
   if (cfg.gpsInterval < 1) return false; // deshabilitado
 
-  char gpsdata[120];
+  char gpsdata[250];
   Trackio::resetGpsData();
   Trackio::getGps();
 
@@ -516,11 +510,12 @@ bool Trackio::transmitGps () {
   }
 
   // add battery
-  char batt[15];
+  char batt[25];
   sprintf(batt, "|%u,%u,%u", Trackio::vbat, Trackio::vin, Trackio::vsys_5v);
   strcat(gpsdata, batt);
 
   Trackio::resetGpsData();
+
 
   return Trackio::transmit(gpsdata);
 }
@@ -802,6 +797,8 @@ bool Trackio::powerOnGps () {
 void Trackio::getGps () {
   if (cfg.gpsInterval < 1) return;
 
+  Trackio::sendCommand((char *) "AT+CLBS=1,1");
+
   Trackio::getBattery();
   Trackio::getSignalStrength();
 
@@ -813,6 +810,7 @@ void Trackio::getGps () {
   char * token2 = strtok(token, " ");
   token2 = strtok(NULL, " ");
 
+  Trackio::_delay(1000);
   Trackio::parseGps(token2);
 }
 
@@ -846,6 +844,7 @@ void Trackio::parseSimcomTime (char * time) {
 
 void Trackio::parseGps (char * gps) {
   char * split = strtok(gps, ",");
+  Trackio::_delay(1000);
 
   split = strtok(NULL, ","); Trackio::gps.fix = atoi(split);
   split = strtok(NULL, ","); strcpy(Trackio::gps.time, split);

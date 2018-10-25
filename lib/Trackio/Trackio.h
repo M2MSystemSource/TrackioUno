@@ -38,11 +38,6 @@
 #define _ SerialMon.print
 #define __ SerialMon.println
 
-// OFFSETS para el cálculo en las lecturas analógicas de baterías
-const float mV_step_used = 0.00322265625;
-const float aux_bat = 0.31972789115646258503401360544218;
-const float aux_ext_bat = 0.04489016236867239732569245463228;
-
 /**
  * @brief Modo operacional por defecto al arrancar el dispositivo
  */
