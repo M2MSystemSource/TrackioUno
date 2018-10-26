@@ -143,6 +143,12 @@ void Trackio::loadConf () {
     cfg = owner;
   }
 
+  if (cfg.GPIO6 == HIGH) {
+    digitalWrite(IO6, HIGH);
+  } else {
+    digitalWrite(IO6, LOW);
+  }
+
   __(F("Configuración cargada..."));
 }
 
@@ -610,7 +616,13 @@ bool Trackio::processCommand (char * cmd) {
   // damos por hecho que es válido (luego se verá)
   bool isValidCmd = true;
 
-  if      (strcmp(command.property, "IO6") == 0) return Trackio::cmd_setIO(IO6, command.value);
+  if (strcmp(command.property, "IO6") == 0) {
+    cfg.GPIO6 = (strcmp(command.value, "ON") == 0) ? HIGH : LOW;
+    _(F("GUARDAMOS: ")); __(command.value);
+    _(F("GUARDAMOS: ")); __(cfg.GPIO6);
+    Trackio::saveConf();
+    return Trackio::cmd_setIO(IO6, command.value);
+  }
   else if (strcmp(command.property, "IO7") == 0) return Trackio::cmd_setIO(IO7, command.value);
   else if (strcmp(command.property, "MOSI") == 0) return Trackio::cmd_setIO(MOSI, command.value);
   else if (strcmp(command.property, "MISO") == 0) return Trackio::cmd_setIO(MISO, command.value);

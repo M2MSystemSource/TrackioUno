@@ -192,6 +192,8 @@ struct Conf {
    * El envío del byte es un modo continuo de indicar al servidor que "estoy vivo"
    */
   unsigned int transmissionClock;
+
+  byte GPIO6;
 };
 
 extern struct Conf cfg;
