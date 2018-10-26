@@ -1,16 +1,22 @@
 # TrackioUno - GPS/GPRS Tracker and IoT Device
 
-TrackioUno es un firmware escrito en C++ especialmente diseñado para el microcontrolador Atmega328p de Microchip. Entre sus principales funcionalidades destaca la posibilidad de trabajar manteniendo un TCP permanentemente abierto, lo que permite una comunicación bidireccional completa entre cliente-servidor.
+TrackioUno es un firmware escrito en C++ especialmente diseñado para la familia SAMD21 (Cortex-M0) de Microchip. Entre sus principales funcionalidades destaca la posibilidad de trabajar manteniendo un TCP permanentemente abierto, lo que permite una comunicación bidireccional completa entre cliente-servidor.
 
 En Trackio.h se ha documentado cada método de la clase Trackio y hay muchas referencias sobre el uso del módulo Sim868 de Rhomb.io, por lo que también puede ser útil para aprender a utilizarlo.
 
-El firmware está compuesto básicamente de 3 archivos, la clase Trackio en los ficheros Trackio.h y Trackio.cpp y el archivo  main.cpp. Se incluye además el archivo _rhio-pins.h_ para la configuración de pins con la plataforma Rhomb.io y _static-conf.h_ para la configuración de algunos parámetros estáticos no modificables en tiempo de ejecución.
+El firmware está compuesto básicamente de 3 archivos, la clase Trackio en los ficheros Trackio.h y Trackio.cpp y el archivo  main.cpp. Se incluye además el archivo _rhio-pins.h_ para la configuración de pins con la plataforma Rhomb.io y _static-conf.h_ para la configuración de algunos parámetros estáticos no modificables en tiempo de ejecución. También se han incluído algunas dependencias de terceros para gestión de Watchdog/Sleep y FlashMemory
 
 ## Descargar el Código
+
+A partir de de la versión 0.3.0 se da compapatibilidad a Duino Zero. Para Duino Uno/Mega se debe usar una versión 0.2.x
 
 TrackioUno está disponible en [Github](https://github.com/M2MSystemSource/TrackioUno). Puedes descargar la [rama master](https://github.com/M2MSystemSource/TrackioUno/archive/master.zip) con los últimos cambios aunque puede no ser estable, si necesitas una versión segura es mejor descargar una [release](https://github.com/M2MSystemSource/TrackioUno/releases).
 
 **IMPORTANTE!** Debes duplicar los archivos `platformio.ini.sample` y `lib/Trackio/static-conf.h.sample` eliminando la extensión `.sample` del modo que obtendrás `platformio.ini` y `lib/Trackio/static-conf.h`. **Si piensas publicar cambios en Git no elimines los archivos `.sample` para que no desaparezcan del repositorio.**
+
+### Duino Uno
+
+La anterior versión, v0.2.x es compatible con Duino Uno (atmega328p) y Mega (Atmega2560/1280). Se mantiene la rama [DuinoUno](https://github.com/M2MSystemSource/TrackioUno/tree/DuinoUno) con esta versión, ademas de todas las releases de esta rama.
 
 ## IDE de programación y upload
 
@@ -31,40 +37,19 @@ Una vez instalado el editor debemos utilizar su gestor de plugins, que se conect
 
 ## Soporte para módulos master
 
-TrackioUno ha sido especialmente diseñado para Atmega328p por las carácteristicas de RAM y CPU disponibles, aunque esto no debería impedir su uso en otros módulos:
-
-* [Duino Uno](#),
-* [Duino Mega](#)
-
-Algunas funciones pueden no ser compatibles con otras placas, por ejemplo la gestión de Sleep/Watchdog y el método `serialEvent()` de arduino difieren en placas como [Duino Zero](#) o [Duino Leonardo](#).
-
-Cuando queremos flashear un código en una de estas placas hay que indicar una configuración concreta, utilizando el archivo _platformio.ini_ y _rhio-pins.h_.
+Desde la version 0.3.x el soporte de módulos master se limita a Duino Zero. La serie 0.2.x Soporta los mcus con arquitectura AVR, Duino Uno y Mega
 
 ### Configuración de platformio.ini para upload
 
-En la raíz del proyecto deberemos haber creado el archivo _platformio.ini_ a partir de _platformio.ini.sample_, donde le indicamos a PlatformIO que compilador debe utiliza. Además de la configuració para Duino Uno también se añaden comentadas otras para _Mega_ y _Zero_
+En la raíz del proyecto deberemos haber creado el archivo _platformio.ini_ a partir de _platformio.ini.sample_, donde le indicamos a PlatformIO que compilador y método de upload debe utilizar.
 
 ~~~ini
-;[env:uno]
-;platform = atmelavr
-;board = uno
-;framework = arduino
-;upload_port = /dev/ttyUSB0
-;build_flags = -D SERIAL_RX_BUFFER_SIZE=128
-
-;[env:megaatmega2560]
-;platform = atmelavr
-;board = megaatmega2560
-;framework = arduino
-;build_flags = -D SERIAL_RX_BUFFER_SIZE=128
-;upload_port = /dev/ttyUSB0
-
-;[env:zeroUSB]
-;platform = atmelsam
-;board = zeroUSB
-;framework = arduino
-;build_flags = -D SERIAL_BUFFER_SIZE=128
-;upload_port = /dev/ttyACM0
+[env:zeroUSB]
+platform = atmelsam
+board = zeroUSB
+framework = arduino
+build_flags = -D SERIAL_BUFFER_SIZE=128
+upload_port = /dev/ttyACM0
 ~~~
 
 El punto y coma indica un comentario, por lo que ahora no estaría disponible ninguna opción, para programar un _Duino Uno_ descomentas sus variables al tiempo que el resto quedan comentadas:
