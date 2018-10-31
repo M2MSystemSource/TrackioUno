@@ -10,7 +10,12 @@ El firmware está compuesto básicamente de 3 archivos, la clase Trackio en los 
 
 A partir de de la versión 0.3.0 se da compapatibilidad a Duino Zero. Para Duino Uno/Mega se debe usar una versión 0.2.x
 
-TrackioUno está disponible en [Github](https://github.com/M2MSystemSource/TrackioUno). Puedes descargar la [rama master](https://github.com/M2MSystemSource/TrackioUno/archive/master.zip) con los últimos cambios aunque puede no ser estable, si necesitas una versión segura es mejor descargar una [release](https://github.com/M2MSystemSource/TrackioUno/releases).
+TrackioUno está disponible en [Github](https://github.com/M2MSystemSource/TrackioUno. Se ofrecen distintas ramas:
+
+* [master](#) Última versión estable (sin bugs conocidos)
+* [develop](#) Versión en desarrollo (NO estable)
+
+ Puedes descargar la [rama master](https://github.com/M2MSystemSource/TrackioUno/archive/master.zip) con los últimos cambios aunque puede no ser estable, si necesitas una versión segura es mejor descargar una [release](https://github.com/M2MSystemSource/TrackioUno/releases).
 
 **IMPORTANTE!** Debes duplicar los archivos `platformio.ini.sample` y `lib/Trackio/static-conf.h.sample` eliminando la extensión `.sample` del modo que obtendrás `platformio.ini` y `lib/Trackio/static-conf.h`. **Si piensas publicar cambios en Git no elimines los archivos `.sample` para que no desaparezcan del repositorio.**
 
