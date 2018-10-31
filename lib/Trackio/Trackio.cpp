@@ -49,7 +49,7 @@ char buffer[120];
  * @brief Indica si se mostrarán mensajes de log (solo afecta al método
  * Trackio::sendComman())
  */
-bool __DEBUG = true;
+bool __DEBUG = true;-
 
 /**
  * @brief Cada vez que un comando AT falla se suma 1. Al llegar a X se hará
@@ -400,8 +400,7 @@ bool Trackio::checkCreg () {
 
   // Verificamos el creg 10 veces
 	for (int i=0; i<10; i++) {
-		char x2[9] = "AT+CREG?";
-	  Trackio::sendCommand(x2);
+
 
 		if (strstr(buffer, ",5") || strstr(buffer, ",1")) {
 	    Trackio::cregOk = true;
@@ -1026,7 +1025,8 @@ bool Trackio::sendCommand (char *cmd, char * validate, int time) {
   while (SerialSim.available()) SerialSim.read();
 
 	// vaciamos el buffer previo
-  strcpy(buffer, "");
+  // strcpy(buffer, "");
+  memset(buffer, 0, sizeof buffer);
 
   if (__DEBUG) {
     SerialMon.println(F(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"));
@@ -1039,11 +1039,12 @@ bool Trackio::sendCommand (char *cmd, char * validate, int time) {
 
 	Trackio::_delay(time);
 
-	// Esperamos respuesta comprobando el buffer cada 400 millis
+	// Esperamos respuesta comprobando el buffer cada x millis
   while (!SerialSim.available()) {
     SerialMon.print(F("."));
     Trackio::_delay(100);
     count++;
+
     if (count > 100) {
       SerialMon.println(F("sendSerialAt failed"));
       modemSerialsFails++;
@@ -1063,6 +1064,8 @@ bool Trackio::sendCommand (char *cmd, char * validate, int time) {
     indexPosition++;
     Trackio::_delay(5);
   }
+
+  buffer[indexPosition] = '\0';
 
   if (__DEBUG) {
     SerialMon.println(buffer);
