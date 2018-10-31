@@ -277,6 +277,7 @@ void checkCommand () {
 }
 
 void externalWatchdogInterrupt() {
+  SerialMon.println(",");
   // pulso directo sobre pin PB5, que corresponde con SPI_CLK
   DDRB = DDRB | B00100000;
   PORTB = PORTB & B11011111;

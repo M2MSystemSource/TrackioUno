@@ -1,5 +1,8 @@
 # Changelog
 * **0.2.8. - 2018-10-23**
+  * Para vaciar el buffer que almacena respuestas de SerialAt se reemplaza strcpy() por memset()
+
+* **0.2.8. - 2018-10-23**
   * FIX IO7 se utiliza para medición de VIN y no puede ser de tipo OUTPUT
   * FIX eliminado param extra de blink
 
