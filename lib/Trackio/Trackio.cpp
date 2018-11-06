@@ -944,7 +944,7 @@ bool Trackio::sendCommand (char *cmd, char * validate, int time) {
   while (SerialSim.available()) SerialSim.read();
 
   // vaciamos el buffer previo
-  strcpy(buffer, "");
+  memset(buffer, 0, sizeof buffer);
 
   if (__DEBUG) {
     __(F(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"));
