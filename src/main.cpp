@@ -44,7 +44,7 @@
 
 #if defined(__AVR_ATmega328P__)
   #include <SoftwareSerial.h>
-  SoftwareSerial SoftSerial(A5, A4);
+  SoftwareSerial SoftSerial(RHIO_SOFT_RX, RHIO_SOFT_TX);
 #endif
 
 Trackio trackio;
@@ -228,7 +228,7 @@ bool getGps (bool manageTcp) {
   // encarga de aumentar este contador (trackio.transmissionClockCounter).
   // Si venimos de un reset y esta es la primera posición que se intenta enviar,
   // le damos salida para no tener que esperar a que se cumpla el reloj
-  if (trackio.transmissionClockCounter < cfg.gpsInterval) {
+  if (trackio.transmissionClockCounter < cfg.gpsInterval && firstPositionHasBeenSent) {
     // todavía no es momento de enviar el GPS
     return false;
   }
@@ -246,6 +246,7 @@ bool getGps (bool manageTcp) {
     return false;
   }
 
+  firstPositionHasBeenSent = true;
   return true;
 }
 
@@ -277,7 +278,6 @@ void checkCommand () {
 }
 
 void externalWatchdogInterrupt() {
-  SerialMon.println(",");
   // pulso directo sobre pin PB5, que corresponde con SPI_CLK
   DDRB = DDRB | B00100000;
   PORTB = PORTB & B11011111;
