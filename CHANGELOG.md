@@ -1,6 +1,12 @@
 # Changelog
-* **0.2.8. - 2018-10-23**
+* **0.2.9. - 2018-11-08**
+  * Soporte para lectura de baterías con el ADC TLA2024 (Halley Box)
+  * FIX obtención de la primera trama sin esperar al ciclo de gpsInterval()
   * Para vaciar el buffer que almacena respuestas de SerialAt se reemplaza strcpy() por memset()
+  * Nuevo Makefile para platformio (permite trabajar con cualquier IDE)
+  * Soporte para DuinoUno OLD (pins en rhio-pins.h)
+  * Pines Tx/Rx del SoftwareSerial son configurables en `static-conf.h`
+  * Nuevos métodos `_()` y `__()` como macros de `SerialMon.print` y `SerialMon.println`
 
 * **0.2.8. - 2018-10-23**
   * FIX IO7 se utiliza para medición de VIN y no puede ser de tipo OUTPUT
