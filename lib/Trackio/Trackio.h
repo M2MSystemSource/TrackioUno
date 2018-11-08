@@ -29,16 +29,27 @@
 
 #ifndef TRACKIO
 #define TRACKIO
-#define VERSION "0.2.8"
+#define VERSION "0.2.9"
 
 #include <Arduino.h>
 #include "static-conf.h"
 #include "rhio-pins.h"
 
+/**
+ * @brief Indica si se mostrarán mensajes de log (solo afecta al método
+ * Trackio::sendComman())
+ */
+#define __DEBUG 1
+#define __(x) if (__DEBUG) {SerialMon.println(x);}
+#define _(x) if (__DEBUG) {SerialMon.print(x);}
+
 // OFFSETS para el cálculo en las lecturas analógicas de baterías
 const float mV_step_used = 0.00322265625;
-const float aux_bat = 0.31972789115646258503401360544218;
-const float aux_ext_bat = 0.04489016236867239732569245463228;
+/*const float aux_bat = 0.31972789115646258503401360544218;
+const float aux_ext_bat = 0.04489016236867239732569245463228;*/
+const float VBAT_aux=0.3197278911564626;
+const float VIN_aux=0.0231513138614829;
+const float VSYS_aux=0.3197278911564626;
 
 /**
  * @brief Modo operacional por defecto al arrancar el dispositivo
@@ -104,6 +115,10 @@ struct Conf {
    *     vin/vsys quedaran a cero
    * 2 = Lectura de batería desde puertos analógicos definidos en VBAT_PIN,
    *     VIN_PIN y VSYS_PIN
+   * 3 = Lectura de VBAT, VIN y VSYS utilizando el ADC TLA2024 de Halley BOX
+   *
+   * El método 3 requiere cargar la librería del TLA2024. Esto se realiza en
+   * Trackio.cpp
    */
   char battMode;
 
@@ -418,15 +433,54 @@ class Trackio {
      *
      * Si cfg.battMode=1 se leerá batería del simcom (AT+CBC), solo VBAT
      * Si cfg.battMode=2 se leerá batería de los pines analógicos.
-     * Las analógicas de VBAT como VIN están declaradas al inicio de Trackio.h
+     * Si cfg.battMode=3 se utilizará el ADC TLA2024
      *
      * El resultado se añadirá a la trama GPS en función de Trackio::Conf.addBattToGps
      */
     void getBattery();
 
+    /**
+     * @brief Lectura de batería del simcom
+     *
+     * En ocasiones es posible que las líneas analógicas no estén disponibles
+     * para su lectura. Establecemos VBAT utilizando la lectura que nos de el
+     * Simcom. VSYS y VIN quedarán en desuso
+     */
     void getSimcomBattery();
+
+    /**
+     * @brief Lectura de baterías utilizando las líneas analógicas del simcom
+     * Se leerá VBAT, VIN y VSYS. Los pines analógicos para cada línea se
+     * indican en el archivo static-conf.h.
+     *
+     * Utiliza el método Trackio::readAnalogBatt() para obtener las lecturas.
+     */
     void getAnalogBattery();
+
+    /**
+     * @brief Utiliza readAnalog() de arduino para obtener la lectura de los
+     * pines analógicos. Se utiliza este método junto con getAnalogBattery()
+     *
+     * @param adc_pin Pin a leer
+     */
     uint16_t readAnalogBatt(byte adc_pin);
+
+    /**
+     * @brief Lectura de baterías utilizando el ADC TLA2024
+     *
+     * Obtenemos la lectura para VBAT, VSYS y VIN. Este ADC está disponible en
+     * algunas placas, como Halley Box. Utiliza el puerto I2C (Ocupará las
+     * líneas SDA/SCL).
+     *
+     * Utiliza el método Trackio::readTLA2024Battery() para realizar la lectura
+     */
+    void getTLA2024Battery();
+
+    /**
+     * @brief Método para lectura de baterías con el ADC TLA2024. Utiliza la
+     * clase
+     */
+    float readTLA2024Battery(byte channel, float aux);
     void checkLowBattery();
 
     /**

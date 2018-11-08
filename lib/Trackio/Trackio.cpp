@@ -32,6 +32,12 @@
 
 #include "Trackio.h"
 
+// Soporte para lectura de baterías con el ADC TLA2024
+#if readBatteryMode == 3
+#include "TLA2024.h"
+TLA2024 adc = TLA2024();
+#endif
+
 #define OK         (char *) "OK"
 #define ERROR      (char *) "ERROR"
 #define READY      (char *) "READY"
@@ -45,11 +51,6 @@ struct Conf cfg;
  */
 char buffer[120];
 
-/**
- * @brief Indica si se mostrarán mensajes de log (solo afecta al método
- * Trackio::sendComman())
- */
-bool __DEBUG = true;
 
 /**
  * @brief Cada vez que un comando AT falla se suma 1. Al llegar a X se hará
@@ -158,6 +159,15 @@ void Trackio::configure () {
 
   Trackio::_delay(100);
 
+  #if readBatteryMode == 3
+    // configuramos el TLA2024 (Halley Box)
+    adc.begin();
+    adc.setFSR(20);  //-> ± 2.048 (default)
+    adc.setMux(4);   // point to channel AIN0
+    adc.setDR(1);    // DR = 250 SPS
+    adc.setMode(CONT);
+  #endif
+
   SerialMon.println(F("Configure OK"));
 }
 
@@ -167,8 +177,6 @@ void Trackio::loadConf () {
   if (cfg.eeprom != RH_configVersion) {
     SerialMon.println(F("Caragando configuración por primera vez..."));
 
-    // RECUERDA! Si realizas un cambio aquí, modifica la variable configVersion,
-    // al inicio de este archivo, para asegurar que los cambios se aplican
     cfg.battMode = RH_battMode;
     cfg.deepSleep = RH_deepSleep;
     cfg.eeprom = RH_eeprom;
@@ -270,8 +278,10 @@ void Trackio::printBattery () {
 void Trackio::getBattery () {
   if (cfg.battMode == 1) {
     Trackio::getSimcomBattery();
-  } else {
+  } else if (cfg.battMode == 2) {
     Trackio::getAnalogBattery();
+  } else if (cfg.battMode == 3) {
+    Trackio::getTLA2024Battery();
   }
 
   Trackio::checkLowBattery();
@@ -327,25 +337,44 @@ void Trackio::getAnalogBattery() {
 
   // --
   lectura_mV = Trackio::readAnalogBatt(VSYS_PIN);
-  aux_f = (float) (lectura_mV / aux_bat);
+  aux_f = (float) (lectura_mV / VSYS_aux);
   result = (uint16_t) aux_f;
   Trackio::vsys_5v = result;
   SerialMon.print("VSYS_5v: "); SerialMon.print(result);
 
   // --
   lectura_mV = Trackio::readAnalogBatt(VBAT_PIN);
-  aux_f = (float) (lectura_mV / aux_bat);
+  aux_f = (float) (lectura_mV / VBAT_aux);
   result = (uint16_t) aux_f - 100L;
   Trackio::vbat = result;
   SerialMon.print(" - VBAT: "); SerialMon.print(result);
 
   // --
   lectura_mV = Trackio::readAnalogBatt(VIN_PIN);
-  aux_f = (float) (lectura_mV / aux_ext_bat);
+  aux_f = (float) (lectura_mV / VIN_aux);
   result = (uint16_t) aux_f;
   Trackio::vin = result;
   SerialMon.print(" - VIN: "); SerialMon.println(result);
   SerialMon.println(F(""));
+}
+
+void Trackio::getTLA2024Battery () {
+  Trackio::vbat = (int) Trackio::readTLA2024Battery(AIN0, VBAT_aux);
+  _("VBAT: "); __(Trackio::vbat);
+
+  Trackio::vsys_5v = (int) Trackio::readTLA2024Battery(AIN2, VSYS_aux);
+  _("VSYS: "); __(Trackio::vsys_5v);
+
+  Trackio::vin = (int) Trackio::readTLA2024Battery(AIN1, VIN_aux);
+  _("VIN: "); __(Trackio::vin)
+}
+
+float Trackio::readTLA2024Battery(byte channel, float aux) {
+  float result;
+  adc.setMux(channel);
+  float val = adc.analogRead();
+  result = (float) (val / aux);
+  return result;
 }
 
 uint16_t Trackio::readAnalogBatt(byte adc_pin) {
@@ -643,27 +672,6 @@ bool Trackio::tcpHasCommand () {
     }
   }
 
-  return false;
-
-
-  return false;
-  __DEBUG = false;
-  strcpy(buffer, "");
-
-  Trackio::sendCommand((char *) "AT+CIPRXGET=2,50");
-  char * split;
-  split = strtok(buffer, "\n");
-  split = strtok(NULL, "\n");
-  split = strtok(NULL, "\n");
-  char cmd[50];
-  strcpy(cmd, split);
-  // primer y último caracter como # y $
-  if ((int) cmd[0] == 35 || (int) cmd[strlen(cmd) -1] == 36) {
-    strcpy(Trackio::cmd, Trackio::extractCommand(cmd));
-    return true;
-  }
-
-  __DEBUG = true;
   return false;
 }
 
