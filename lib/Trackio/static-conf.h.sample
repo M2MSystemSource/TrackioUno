@@ -11,11 +11,17 @@
  */
 #define RH_configVersion 1
 
+/**
+ * @brief Método utilizado para lectura de baterías. Más detalles en
+ * `Conf.battMode` (Trackio.h)
+ */
+#define readBatteryMode 3
+
 // #####################################################
 // Configuración General. Determina el funcionamiento del dispositivo según
 // el Struct Conf en Trackio.h. Por favor, revisa la documentación en Trackio.h
 // para conocer el significado de cada parámetro
-#define RH_battMode 2
+#define RH_battMode readBatteryMode
 #define RH_deepSleep false
 #define RH_eeprom RH_configVersion
 #define RH_gpsInterval 5
@@ -26,6 +32,26 @@
 #define RH_requiredVbat 3650
 #define RH_requiredVin 0
 #define RH_requiredVsys5v 0
+
+// #####################################################
+// SoftwareSerial PINS
+#define RHIO_SOFT_RX 11
+#define RHIO_SOFT_TX 12
+
+// #####################################################
+// Selección de placa base, incluido el socket donde se conectará el Sim868
+// #define DEIMOS_SOCKET1_MEGA2560
+// #define DEIMOS_SOCKET2_MEGA2560
+// #define HALLEY_SOCKET2_MEGA2560
+// #define HALLEY_SOCKET2_UNO
+// #define DEIMOS_SOCKET1_ZEROSAMD21
+// #define DEIMOS_SOCKET1_UNO
+
+// #####################################################
+// Selección de MCU
+// #define PINS_MEGA2560
+// #define PINS_ZEROSAMD21D
+// #define PINS_UNO
 
 // #####################################################
 // Tarjeta SIM y servidor remoto
@@ -42,17 +68,6 @@
 #define VSYS_PIN A6
 #define VIN_PIN A2
 
-// #####################################################
-// Selección de placa base, incluido el socket donde se conectará el Sim868
-// #define DEIMOS_SOCKET1_MEGA2560
-// #define DEIMOS_SOCKET2_MEGA2560
-// #define HALLEY_SOCKET2_MEGA2560
-// #define HALLEY_SOCKET2_UNO
-// #define DEIMOS_SOCKET1_ZEROSAMD21
-// #define DEIMOS_SOCKET1_UNO
-
-// #####################################################
-// Selección de MCU
-// #define PINS_MEGA2560
-// #define PINS_ZEROSAMD21D
-// #define PINS_UNO
+// Indica si se utiliza el conversor ADC modelo TLA2024
+// Es necesario en en las placas HALLEY BOX
+#define USE_ADC_TLA false
