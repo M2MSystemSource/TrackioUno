@@ -67,6 +67,17 @@
     #define SerialMon SoftSerial // comunicación con SIMCOM
   #endif
 
+  #ifdef DEIMOS_SOCKET1_UNO_OLD
+    #define GSM_PWREN  8
+    #define GSM_PWRKEY 9
+    #define GPS_EN     10
+    #define GSM_STATUS 11
+
+    #define SerialSim Serial     // comunicación con SIMCOM
+    extern SoftwareSerial SoftSerial;
+    #define SerialMon SoftSerial // comunicación con SIMCOM
+  #endif
+
   #ifdef PINS_MEGA2560
     #define IO00 36
     #define IO01 33
@@ -151,6 +162,33 @@
     #define AD0     A6
     #define CAPT0   A7
     #define RSTOUT  A3		// SJ1 must be closed & SJ4 must be open
+  #endif
+
+  #ifdef PINS_UNO_s200_OLD
+    #define NMI     0
+    #define _INT0   0
+    #define IO00    8
+    #define IO01    9
+    #define IO02    10
+    #define IO03    11
+    #define IO04    0
+    #define IO05    0
+    #define IO06    0
+    #define IO07    0
+    #define LED01   13
+    #define PWM0    13
+    #define RXD     0
+    #define TXD     0
+    #define SDA     A4
+    #define SCL     A5
+    #define MOSI    0
+    #define MISO    0
+    #define SCK     0
+    #define CS0     0
+    #define _1WIRE  0
+    #define AD0     0
+    #define CAPT0   0
+    #define RSTOUT  0
   #endif
 
 #endif
