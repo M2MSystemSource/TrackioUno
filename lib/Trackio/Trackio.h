@@ -478,9 +478,19 @@ class Trackio {
 
     /**
      * @brief Método para lectura de baterías con el ADC TLA2024. Utiliza la
-     * clase
+     * clase `TLA2024.h` para leer por I2C.
      */
     float readTLA2024Battery(byte channel, float aux);
+
+    /**
+     * @brief Comprueba el estado de las baterías para determinar si se entra
+     * en modo bajo consumo.
+     *
+     * En la configuración `Conf` se crean los valores mínimo por los cuales
+     * se entrará en modo de b ajo consumo, estos son `cfg.requiredVbat`,
+     * `cfg.requiredVsys5v` y `cfg.requiredVin`. Estos valores se pueden ajustar
+     * desde el archivo `static-conf.h`.
+     */
     void checkLowBattery();
 
     /**
