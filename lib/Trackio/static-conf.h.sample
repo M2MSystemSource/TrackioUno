@@ -32,6 +32,7 @@
 #define RH_requiredVbat 3650
 #define RH_requiredVin 0
 #define RH_requiredVsys5v 0
+#define RH_DEBUG 1
 
 // #####################################################
 // SoftwareSerial PINS
