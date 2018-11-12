@@ -110,7 +110,7 @@ void loop() {
   else if (cfg.opmode == OP_STARTUP) op_startup();
   else if (cfg.opmode == OP_LOW) op_low();
   else if (cfg.opmode == OP_RST) {
-    SerialMon.println("Reset Micro - Firing watchdog");
+    __(F("Reset Micro - Firing watchdog"));
     while (1) {};
   }
 
@@ -126,7 +126,6 @@ void loop() {
  * válidos
  */
 void serialEvent() {
-  SerialMon.println("TENEMOS COSAS!!");
   checkCommand();
 }
 
@@ -148,8 +147,8 @@ void op_startup () {
   digitalWrite(LED01, LOW);
 
   if (!trackio.begin()) {
-    SerialMon.println(F("Trackio Critical FAIL - SIM868 can't start"));
-    SerialMon.println(F("Try to powerof and check connection of master/slave modules"));
+    __(F("Trackio Critical FAIL - SIM868 can't start"));
+    __(F("Try to powerof and check connection of master/slave modules"));
     trackio._delay(5000);
     return;
   }
@@ -241,7 +240,7 @@ bool getGps (bool manageTcp) {
   }
 
   if (!trackio.transmitGps()) {
-    SerialMon.println(F("FAIL GPS TRANSMIT!!"));
+    __(F("FAIL GPS TRANSMIT!!"));
     cfg.opmode = OP_STARTUP;
     return false;
   }
