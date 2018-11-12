@@ -109,10 +109,7 @@ void loop() {
   else if (cfg.opmode == OP_AUTO) op_auto();
   else if (cfg.opmode == OP_STARTUP) op_startup();
   else if (cfg.opmode == OP_LOW) op_low();
-  else if (cfg.opmode == OP_RST) {
-    __(F("Reset Micro - Firing watchdog"));
-    while (1) {};
-  }
+  else if (cfg.opmode == OP_RST) trackio.hardReset();
 
   trackio._delay(1);
 }
@@ -149,7 +146,7 @@ void op_startup () {
   if (!trackio.begin()) {
     __(F("Trackio Critical FAIL - SIM868 can't start"));
     __(F("Try to powerof and check connection of master/slave modules"));
-    trackio._delay(5000);
+    trackio.hardReset();
     return;
   }
 
@@ -286,5 +283,5 @@ void externalWatchdogInterrupt() {
     for (timeroneCounter2 = 0; timeroneCounter2 < 1; timeroneCounter2++) {}
   }
 
-    PORTB = PORTB | B00100000;
+  PORTB = PORTB | B00100000;
 }
