@@ -281,7 +281,9 @@ void Trackio::getBattery () {
   } else if (cfg.battMode == 2) {
     Trackio::getAnalogBattery();
   } else if (cfg.battMode == 3) {
+    #if readBatteryMode == 3
     Trackio::getTLA2024Battery();
+    #endif
   }
 
   Trackio::checkLowBattery();
@@ -359,16 +361,17 @@ void Trackio::getAnalogBattery() {
 }
 
 void Trackio::getTLA2024Battery () {
-  Trackio::vbat = (int) Trackio::readTLA2024Battery(AIN0, VBAT_aux);
+  Trackio::vbat = (int) Trackio::readTLA2024Battery(VBAT_PIN, VBAT_aux);
   _("VBAT: "); __(Trackio::vbat);
 
-  Trackio::vsys_5v = (int) Trackio::readTLA2024Battery(AIN2, VSYS_aux);
+  Trackio::vsys_5v = (int) Trackio::readTLA2024Battery(VSYS_PIN, VSYS_aux);
   _("VSYS: "); __(Trackio::vsys_5v);
 
-  Trackio::vin = (int) Trackio::readTLA2024Battery(AIN1, VIN_aux);
+  Trackio::vin = (int) Trackio::readTLA2024Battery(VIN_PIN, VIN_aux);
   _("VIN: "); __(Trackio::vin)
 }
 
+#if readBatteryMode == 3
 float Trackio::readTLA2024Battery(byte channel, float aux) {
   float result;
   adc.setMux(channel);
@@ -376,6 +379,7 @@ float Trackio::readTLA2024Battery(byte channel, float aux) {
   result = (float) (val / aux);
   return result;
 }
+#endif
 
 uint16_t Trackio::readAnalogBatt(byte adc_pin) {
   int readingADC;
