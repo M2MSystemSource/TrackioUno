@@ -524,7 +524,7 @@ bool Trackio::openTcp () {
   openTcpFails++;
   if (openTcpFails == 3) {
     __(F("El TCP ha fallado en multiples ocasiones - Hard Reset!"));
-    while (1) {} // llamamos al watchdog.
+    Trackio::hardReset();
   }
 
   return false;
@@ -1046,6 +1046,11 @@ void Trackio::_delay (int time) {
   wdt_reset();
 }
 
+void Trackio::hardReset () {
+  __(F("Hard Reset - Llamando al perro guardian"));
+  while(1) {}
+}
+
 // #############################################################################
 
 bool Trackio::sendCommand (char * cmd, char * validate) {
@@ -1090,7 +1095,7 @@ bool Trackio::sendCommand (char *cmd, char * validate, int time) {
       modemSerialsFails++;
       if (modemSerialsFails > 10) {
         __(F("Muchos fallos, reiniciando en 8 secs, o pulsa botón reset..."));
-        delay(10000);
+        Trackio::hardReset();
       }
       return false;
     }
