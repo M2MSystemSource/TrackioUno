@@ -29,7 +29,7 @@
 
 #ifndef TRACKIO
 #define TRACKIO
-#define VERSION "0.2.9"
+#define VERSION "0.2.10"
 
 #include <Arduino.h>
 #include "static-conf.h"
@@ -39,9 +39,8 @@
  * @brief Indica si se mostrarán mensajes de log (solo afecta al método
  * Trackio::sendComman())
  */
-#define __DEBUG 1
-#define __(x) if (__DEBUG) {SerialMon.println(x);}
-#define _(x) if (__DEBUG) {SerialMon.print(x);}
+#define __(x) if (RH_DEBUG) {SerialMon.println(x);}
+#define _(x) if (RH_DEBUG) {SerialMon.print(x);}
 
 // OFFSETS para el cálculo en las lecturas analógicas de baterías
 const float mV_step_used = 0.00322265625;
@@ -1014,6 +1013,21 @@ class Trackio {
      * @brief Guarda la configuración de Trackio::Conf en memoria EEPROM
      */
     void saveConf();
+
+    /**
+     * @brief Genera un código CRC con la configuración (Struct Conf)
+     *
+     * Este código indica que configuración de software utilizamos. A partir
+     * de un mismo firmware se pueden generar distintas configuraciones. Esto
+     * hace que el archivo HEX final, aunque lleve el mismo firmware,
+     * corresponda a distintas versiones del software.
+     *
+     * Dos trackers pueden tener el mismo firmware pero distintas versiones de
+     * configuración (distinto archivo .HEX). El CRC de la configuración se
+     * muestra en consola en cada reset y debe formar parte del nombre del
+     * archivo HEX en caso de que se quiera distribuir.
+     */
+    void confCRC();
 
     // #########################################################################
 
