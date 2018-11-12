@@ -2,7 +2,7 @@
 * **0.2.9. - 2018-11-08**
   * Soporte para lectura de baterías con el ADC TLA2024 (Halley Box)
   * FIX obtención de la primera trama sin esperar al ciclo de gpsInterval()
-  * Para vaciar el buffer que almacena respuestas de SerialAt se reemplaza strcpy() por memset()
+  * Para vaciar el buffer que almacena respuestas de SerialAt se reemplaza strcpy()por memset()
   * Nuevo Makefile para platformio (permite trabajar con cualquier IDE)
   * Soporte para DuinoUno OLD (pins en rhio-pins.h)
   * Pines Tx/Rx del SoftwareSerial son configurables en `static-conf.h`
@@ -55,25 +55,17 @@
 
 
 * **0.2.1 UNO - 2018-07-27**
-  * Eliminado todo el código de Duino Zero, incluídas las librerías externas
-    de RTC y SleepyDog para dar compatibilidad exclusiva a Duino Uno
-  * Eliminadas variables de configuración y otras funciones (como bluetoth) para
-    reducir consumo de memoria de ram.
-  * Se utilizan las funciones de eeprom propias de AVR para guardar la configuración
-    general. El objeto de configuración se saca de la clase trackio y se convierte
-    en un struct global.
+  * Eliminado todo el código de Duino Zero, incluídas las librerías externas de RTC y SleepyDog para dar compatibilidad exclusiva a Duino Uno
+  * Eliminadas variables de configuración y otras funciones (como bluetoth) para reducir consumo de memoria de ram.
+  * Se utilizan las funciones de eeprom propias de AVR para guardar la configuración general. El objeto de configuración se saca de la clase trackio y se convierte en un struct global.
   * Añadida lectura analógica de baterías para VBAT, VIN y VSYS.
 
 
 * **0.2.0 - 2018-07-12:**
   * OP_TCP: timer para verificar estado de la conexión tcp y reconectar en caso necesario
   * Duino Zero: Implementado watchdog+sleep con la librería SleepyDog
-  * RTC: Implementado un reloj simple obteniendo la fecha desde servidor web. Se utiliza
-    la librería timeLib.h para parsear el unix timestamp en fechas para humanos
-  * Se vacía el setup() del main, OP_STARTUP lo reemplaza. Implementado mecanismo de
-    protección ante fallos para reestablecer modo OP_STARTUP si necesario
+  * RTC: Implementado un reloj simple obteniendo la fecha desde servidor web. Se utiliza la librería timeLib.h para parsear el unix timestamp en fechas para humanos
+  * Se vacía el setup() del main, OP_STARTUP lo reemplaza. Implementado mecanismo de protección ante fallos para reestablecer modo OP_STARTUP si necesario
   * OP_AUTO abre/cierra el TCP cuando necesario
-  * Tramas de datos: Datos de GPS, Sensing y CAN unificados en una unica trama
-    y agregado el método transmitData() para realizar el envío
-  * Método sendCommand, agregada limpieza de buffer y aumentado de 15 a 25 el número
-    de intentos para esperar respuesta
+  * Tramas de datos: Datos de GPS, Sensing y CAN unificados en una unica trama y agregado el método transmitData() para realizar el envío
+  * Método sendCommand, agregada limpieza de buffer y aumentado de 15 a 25 el número de intentos para esperar respuesta
