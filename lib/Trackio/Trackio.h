@@ -1001,6 +1001,14 @@ class Trackio {
      */
     void _delay(int time);
 
+    /**
+     * @brief Fuerza llamada al watchdog para realizar un hard reset
+     *
+     * Básicamente se ejecuta un loop infinito, esto hará saltar el watchdog
+     * pasados 8 segundos y el micro se reiniciará
+     */
+    void hardReset();
+
     // #########################################################################
 
     /**
