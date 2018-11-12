@@ -248,6 +248,12 @@ bool getGps (bool manageTcp) {
 
 void transmitAlive () {
   unsigned long clockTimerDiff = (trackio.timers.base - trackio.timers.transmissionClock);
+
+  if (!firstPositionHasBeenSent) {
+    // hasta que no se envía la primera posición no emitimos ningún alive.
+    return;
+  }
+
   if (clockTimerDiff >= (cfg.transmissionClock * 1000L)) {
     trackio.timers.transmissionClock = trackio.timers.base;
 
