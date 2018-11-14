@@ -1,4 +1,12 @@
 # Changelog
+* **0.2.10. - 2018-11-xx**
+  * Se genera un código CRC de 5 cifras que representa la configuración. Cualquier cambio modificará el CRC y se podrá determinar que dos dispositivos utilizan mismo firmware pero diferente configuración
+  * Nuevo flag `RH_DEBUG` en static-conf permite mostrar/ocultar mensajes por consola
+  * Wrapper para métodos SerialMon.print/println con soporte para nuevo flag `RH_DEBUG`
+  * Nuevo método `Trackio::hardReset()` para forzar reset de watchdog.
+  * En main.c, si `trackio.begin()` devuelve FALSE se ejecutará Trackio::hardReset(). Anteriormente no se hacía nada y simplemente se devolvía FALSE para volver a intentar la conexión
+  * FIX no enviar el alive si antes no se ha enviado la primera posición
+
 * **0.2.9. - 2018-11-08**
   * Soporte para lectura de baterías con el ADC TLA2024 (Halley Box)
   * FIX obtención de la primera trama sin esperar al ciclo de gpsInterval()
