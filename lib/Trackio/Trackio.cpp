@@ -33,6 +33,7 @@
 #include "Trackio.h"
 #include "FastCRC.h"
 FastCRC16 CRC16;
+#include "MemoryFree.h"
 
 // Soporte para lectura de baterías con el ADC TLA2024
 #if readBatteryMode == 3
@@ -1114,6 +1115,7 @@ bool Trackio::sendCommand (char *cmd, char * validate, int time) {
   memset(buffer, 0, sizeof buffer);
 
   __(F(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"));
+  _(F("FREE MEM: ")); _(freeMemory()); __(F("bytes"));
   _(F("SerialSim > ")); __(cmd);
 
   // enviamos el comando al modem
