@@ -111,6 +111,17 @@ ISR(WDT_vect)
   }
 }
 
+/**
+ * @brief Constructor de Trackio
+ *
+ * Se inicializan algunas variables, se configura el TLA2024 y se configuran
+ * los pines del micro
+ */
+Trackio::Trackio () {
+  Trackio::perroGuardian = 0;
+  Trackio::transmissionClockCounter = 0;
+}
+
 bool Trackio::begin() {
   Trackio::configure();
 

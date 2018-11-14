@@ -214,6 +214,7 @@ extern struct Conf cfg;
 
 class Trackio {
   public:
+    Trackio();
     /**
      * @brief Almacena una trama GPS. Trackio::transmitGps() utilizará esta trama
      * para realizar el envío de datos al servidor
