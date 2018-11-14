@@ -123,26 +123,29 @@ Trackio::Trackio () {
 }
 
 bool Trackio::begin() {
-  Trackio::configure();
+  Trackio::clkPulse();
 
   SerialMon.begin(9600);
   SerialSim.begin(9600);
 
-  Trackio::confCRC();
+  Trackio::perroGuardian = 0;
+  Trackio::configure();
+
   Trackio::calculateCRC();
 
   __(F("")); __(F("###########################################"));
   _(F("- Trackio ")); _(F(VERSION)); _(F("|")) _(crcConf); __(F(" START -"));
   __(F("###########################################")); __(F(""));
-  Trackio::blink(3);
 
+  Trackio::clkPulse();
+
+  Trackio::blink(3);
   Trackio::loadConf();
 
   if (!Trackio::powerOn()) {
     return false;
   }
 
-  Trackio::transmissionClockCounter = 0;
   Trackio::printInfo();
   return true;
 }
