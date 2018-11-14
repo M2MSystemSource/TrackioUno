@@ -1,5 +1,6 @@
 # Changelog
 * **0.2.10. - 2018-11-xx**
+  * Nuevo contador `Trackio::perroGuardian` hará saltar el watchdog externo si no se accede al loop desde hace más de 120 segs.
   * Se genera un código CRC de 5 cifras que representa la configuración. Cualquier cambio modificará el CRC y se podrá determinar que dos dispositivos utilizan mismo firmware pero diferente configuración
   * Nuevo flag `RH_DEBUG` en static-conf permite mostrar/ocultar mensajes por consola
   * Wrapper para métodos SerialMon.print/println con soporte para nuevo flag `RH_DEBUG`
