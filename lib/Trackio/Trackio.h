@@ -1036,6 +1036,7 @@ class Trackio {
      * muestra en consola en cada reset y debe formar parte del nombre del
      * archivo HEX en caso de que se quiera distribuir.
      */
+    void calculateCRC();
     void confCRC();
 
     // #########################################################################

@@ -70,7 +70,7 @@ uint8_t modemSerialsFails = 0;
  */
 uint8_t openTcpFails = 0;
 
-char crcConf[10];
+uint16_t crcConf;
 
 /**
  * @brief Número de segundos que se irá a dormir (gneralmente gpsInterval)
@@ -129,6 +129,7 @@ bool Trackio::begin() {
   SerialSim.begin(9600);
 
   Trackio::confCRC();
+  Trackio::calculateCRC();
 
   __(F("")); __(F("###########################################"));
   _(F("- Trackio ")); _(F(VERSION)); _(F("|")) _(crcConf); __(F(" START -"));
@@ -217,24 +218,47 @@ void Trackio::saveConf () {
   eeprom_write_block((const void*)&cfg, (void*)0, sizeof(cfg));
 }
 
-void Trackio::confCRC () {
-  uint8_t crc[15];
-  crc[0] = RH_battMode;
-  crc[1] = RH_deepSleep;
-  crc[2] = RH_eeprom;
-  crc[3] = RH_externalWatchdog;
-  crc[4] = RH_gpsInterval;
-  crc[5] = RH_opmode;
-  crc[6] = RH_sleep;
-  crc[7] = RH_transmissionClock;
-  crc[8] = RH_primaryOpMode;
-  crc[9] = RH_requiredVbat;
-  crc[10] = RH_requiredVin;
-  crc[11] = RH_requiredVsys5v;
-  crc[12] = RH_DEBUG;
+void Trackio::calculateCRC () {
+  /*
+   * Creamos una cadena (confStr) con todos los valores de configuración
+   * concatenados. La librería FastCRC requiere que el parámetro de entrada
+   * sea un array de uint8_t por lo que debemos convertir el char creado en
+   * un array de uint8_t.
+   *
+   * Dicho de otro modo, si queremos el crc de la cadena "51" deberemos
+   * separarla en dos valores, 5 y 1, que en ascii qeuivalen a 53, 49.
+   * Entonces en lugar de hacer `CRC16.ccitt("51")` tendremos que ejecutar
+   * CRC16.ccitt({53, 49});
+   */
 
-  // copiamos el CRC con relleno de ceros a la izquierda para obtener 5 digitos
-  sprintf(crcConf, "%05u", CRC16.ccitt(crc, sizeof(crc)));
+  char confStr[40];
+  uint8_t crc[40];
+
+  sprintf(confStr,
+    "%u%u%u%u%u%u%u%u%u%u%u%u%u",
+    RH_battMode,
+    RH_deepSleep,
+    RH_eeprom,
+    RH_externalWatchdog,
+    RH_gpsInterval,
+    RH_opmode,
+    RH_sleep,
+    RH_transmissionClock,
+    RH_primaryOpMode,
+    RH_requiredVbat,
+    RH_requiredVin,
+    RH_requiredVsys5v,
+    RH_DEBUG
+  );
+
+  // recorremos el array de chars (confStr) para convertirlo en un array
+  // de uint8_t (crc)
+  for (uint8_t i; i < 100; i++) {
+    if (confStr[i] == '\0') break;
+    crc[i] = (int) confStr[i];
+  }
+
+  crcConf = CRC16.ccitt(crc, sizeof(crc));
 }
 
 // #############################################################################
