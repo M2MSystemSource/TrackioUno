@@ -53,9 +53,6 @@ Trackio trackio;
 // no tener que esperar al timer para el envío de la primera posición
 byte firstPositionHasBeenSent = 0;
 
-int timeroneCounter1 = 0;
-int timeroneCounter2 = 0;
-
 // modos operacionales
 void op_startup();
 void op_tcp();
@@ -104,6 +101,7 @@ void setup() {
  */
 void loop() {
   trackio.timers.base = millis();
+  trackio.perroGuardian = 0;
 
   if      (cfg.opmode == OP_TCP) op_tcp();
   else if (cfg.opmode == OP_AUTO) op_auto();
@@ -280,14 +278,16 @@ void checkCommand () {
 }
 
 void externalWatchdogInterrupt() {
-  // pulso directo sobre pin PB5, que corresponde con SPI_CLK
-  DDRB = DDRB | B00100000;
-  PORTB = PORTB & B11011111;
+  // perroGuardian se resetea a cero en el loop. Si su valor supera 120secs
+  // supondría que desde hace más de 2 minutos no se accede al loop por lo que
+  // el programa podría estar en un hang (no hay razón para estar tanto tiempo
+  // fuera del loop)
 
-  // necesitamos un microsegundo
-  for (timeroneCounter1 = 0; timeroneCounter1 < 1; timeroneCounter1++) {
-    for (timeroneCounter2 = 0; timeroneCounter2 < 1; timeroneCounter2++) {}
+  trackio.perroGuardian++; // aumentamos cada seg (tiempo definido en setup())
+  // _(";"); _(trackio.perroGuardian);
+  if (trackio.perroGuardian < 120) {
+    trackio.clkPulse();
+  } else {
+    // _("#");
   }
-
-  PORTB = PORTB | B00100000;
 }

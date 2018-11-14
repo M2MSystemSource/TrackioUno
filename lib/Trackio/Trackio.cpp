@@ -46,6 +46,10 @@ TLA2024 adc = TLA2024();
 #define READY      (char *) "READY"
 #define CONNECT_OK (char *) "CONNECT OK"
 
+// para Trackio::clkPulse()
+int timeroneCounter1 = 0;
+int timeroneCounter2 = 0;
+
 struct Conf cfg;
 
 /**
@@ -178,8 +182,6 @@ void Trackio::configure () {
   pinMode(MISO, OUTPUT); // actuador externo (rele, led...)
   pinMode(MOSI, OUTPUT); // actuador externo (rele, led...)
 
-  Trackio::_delay(100);
-
   #if readBatteryMode == 3
     // configuramos el TLA2024 (Halley Box)
     adc.begin();
@@ -189,7 +191,7 @@ void Trackio::configure () {
     adc.setMode(CONT);
   #endif
 
-  __(F("Configure OK"));
+  Trackio::_delay(100);
 }
 
 // #############################################################################
@@ -314,10 +316,10 @@ void Trackio::powerOff () {
 
 // #############################################################################
 void Trackio::printInfo () {
+  Trackio::getBattery();
   Trackio::getImei();
   Trackio::printIccid();
   Trackio::printBattery();
-  Trackio::getBattery();
 }
 
 void Trackio::getImei () {
@@ -500,7 +502,7 @@ bool Trackio::checkCreg () {
   Trackio::cregOk = false;
 
   // Verificamos el creg 10 veces
-  for (int i=0; i<10; i++) {
+  for (int i=0; i < 10; i++) {
     char x2[9] = "AT+CREG?";
     Trackio::sendCommand(x2);
 
@@ -1088,6 +1090,19 @@ void Trackio::_delay (int time) {
 void Trackio::hardReset () {
   __(F("Hard Reset - Llamando al perro guardian"));
   while(1) {}
+}
+
+void Trackio::clkPulse () {
+  // pulso directo sobre pin PB5, que corresponde con SPI_CLK
+  DDRB = DDRB | B00100000;
+  PORTB = PORTB & B11011111;
+
+  // necesitamos un microsegundo
+  for (timeroneCounter1 = 0; timeroneCounter1 < 1; timeroneCounter1++) {
+    for (timeroneCounter2 = 0; timeroneCounter2 < 2; timeroneCounter2++) {}
+  }
+
+  PORTB = PORTB | B00100000;
 }
 
 // #############################################################################

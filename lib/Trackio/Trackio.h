@@ -287,6 +287,27 @@ class Trackio {
     unsigned int vsys_5v;
 
     /**
+     * @brief Software Watchdog utilizando la interrupción del timer3 (main.c)
+     *
+     * Se han descubierto varios bugs donde el programa entra en un loop
+     * infinito al ejecutar alguna función, por ejemplo obtener el CREG
+     * (`Trackio::checkCreg()`) o verificar estado del GPRS
+     * (`Trackio::gprsIsOpen()`). Se desconoce la razón de este bug pero se
+     * asocia a un diseño de software incorrecto o un fallo en el Atmega328p
+     * (no se ha llegado a ver el error en los SAMD21)
+     *
+     * Para intentar mitigarlo se crea este flag, `perroGuardian`, el cual es
+     * una variable contador que se resetea al entrar al loop o enviar un comando
+     * serial al Simcom. El contador se aumenta en la interrupción del timer3
+     * con el método `externalWatchdogInterrupt()` en `main.c` (cada segundo).
+     * Si este contador llega al valor de 10 se entiende que el programa no está
+     * accediendo al loop ni enviando comandos AT al modem por lo que estamos
+     * en un posible hang del micro. Se forzará un hard reset del watchdog
+     * interno mediante un loop infinito.
+     */
+    uint8_t perroGuardian;
+
+    /**
      * @brief Número de IMEI del simcom
      *
      * Se utiliza como contraseña del dispositivo para conectar con el servidor
@@ -1037,7 +1058,8 @@ class Trackio {
      * archivo HEX en caso de que se quiera distribuir.
      */
     void calculateCRC();
-    void confCRC();
+
+    void clkPulse();
 
     // #########################################################################
 
