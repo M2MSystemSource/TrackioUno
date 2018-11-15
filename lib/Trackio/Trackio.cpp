@@ -212,20 +212,19 @@ void Trackio::printInfo () {
 }
 
 void Trackio::getImei () {
-  char x[8] = "AT+CGSN";
-  // guardamos el imei en el buffer
-  Trackio::sendCommand(x);
+  if (Trackio::sendAt((char *) "AT+CGSN", 2)) {
+    if (strlen(buffer) == 15) {
+      strcpy(Trackio::imei, buffer);
+      _(F("   -> IMEI: ")); __(Trackio::imei);
+      return;
+    }
+  }
 
-  char * splitImei;
-
-  splitImei = strtok(buffer, "\n");
-  splitImei = strtok(NULL, "\n");
-  strncpy(imei, splitImei, 15);
-
-  _(F("IMEI: ")); __(imei);
+  _(F("   -> IMEI: ")); __("FAIL");
 }
 
 void Trackio::printIccid () {
+  Trackio::sendAt((char *) "AT+CCID");
 }
 
 void Trackio::getBattery () {
