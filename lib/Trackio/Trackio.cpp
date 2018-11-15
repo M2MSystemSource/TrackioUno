@@ -587,27 +587,6 @@ bool Trackio::tcpHasCommand () {
   }
 
   return false;
-
-
-  return false;
-  __DEBUG = false;
-  Trackio::emptyBuffer();
-
-  Trackio::sendCommand((char *) "AT+CIPRXGET=2,50");
-  char * split;
-  split = strtok(buffer, "\n");
-  split = strtok(NULL, "\n");
-  split = strtok(NULL, "\n");
-  char cmd[50];
-  strcpy(cmd, split);
-  // primer y último caracter como # y $
-  if ((int) cmd[0] == 35 || (int) cmd[strlen(cmd) -1] == 36) {
-    strcpy(Trackio::cmd, Trackio::extractCommand(cmd));
-    return true;
-  }
-
-  __DEBUG = true;
-  return false;
 }
 
 bool Trackio::processCommand (char * cmd) {
