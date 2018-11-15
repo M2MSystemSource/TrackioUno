@@ -35,8 +35,8 @@
 #include "static-conf.h"
 #include "rhio-pins.h"
 
-#define _ SerialMon.print
-#define __ SerialMon.println
+#define _(x) if (RH_DEBUG) SerialMon.print(x)
+#define __(x) if (RH_DEBUG) SerialMon.println(x)
 
 /**
  * @brief Modo operacional por defecto al arrancar el dispositivo
