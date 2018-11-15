@@ -953,6 +953,11 @@ class Trackio {
      */
     void blink();
 
+    /**
+     * @brief Vacía el buffer de Trackio.cpp
+     */
+    void emptyBuffer();
+
     // #########################################################################
 
     void sleepNow(uint8_t times);

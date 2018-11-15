@@ -553,9 +553,9 @@ char * Trackio::getTransmitResponse (char * buffer) {
 
 bool Trackio::tcpHasCommand () {
   uint8_t counter = 0;
-  strcpy(buffer, "");
   bool gettingCommand = false;
   bool hasCommand = false;
+  Trackio::emptyBuffer();
 
   if (SerialSim.available()) {
     while (SerialSim.available() > 0) {
@@ -591,7 +591,7 @@ bool Trackio::tcpHasCommand () {
 
   return false;
   __DEBUG = false;
-  strcpy(buffer, "");
+  Trackio::emptyBuffer();
 
   Trackio::sendCommand((char *) "AT+CIPRXGET=2,50");
   char * split;
@@ -912,6 +912,10 @@ void Trackio::blink () {
   Trackio::blink(3, 200);
 }
 
+void Trackio::emptyBuffer () {
+  memset(buffer, 0, sizeof buffer);
+}
+
 // #############################################################################
 
 void Trackio::sleepNow(uint8_t times) {
@@ -944,7 +948,7 @@ bool Trackio::sendCommand (char *cmd, char * validate, int time) {
   while (SerialSim.available()) SerialSim.read();
 
   // vaciamos el buffer previo
-  memset(buffer, 0, sizeof buffer);
+  Trackio::emptyBuffer();
 
   if (__DEBUG) {
     __(F(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"));
