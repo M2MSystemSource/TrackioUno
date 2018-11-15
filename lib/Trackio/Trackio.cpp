@@ -981,3 +981,65 @@ bool Trackio::sendCommand (char *cmd, char * validate, int time) {
 
   return true;
 }
+
+// #############################################################################
+
+bool Trackio::sendAt (char * cmd) {
+  return sendAt(cmd, 2, NULL);
+}
+
+bool Trackio::sendAt (char * cmd, char * validate) {
+  return sendAt(cmd, 2, NULL);
+}
+
+bool Trackio::sendAt (char * cmd, int returnLine) {
+  return sendAt(cmd, returnLine, NULL);
+}
+
+bool Trackio::sendAt (char * cmd, int returnLine, char * validate) {
+  int loopCounter = 0;
+  int lineCount = 0;
+  bool hasLine = false;
+  char * serialBuffer;
+
+  // empty buffer
+  while (SerialSim.available()) SerialSim.read();
+  Trackio::emptyBuffer();
+
+  // debug
+  __("");
+  __(F(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"));
+  _("sendAt > "); __(cmd);
+
+  // send command to the modem
+  SerialSim.println(cmd);
+  SerialSim.flush(); // ensure command is sent
+
+  while (loopCounter < 40) {
+    // _(".");
+    serialBuffer = readLine.feed(&SerialSim);
+    if (serialBuffer != NULL) {
+      lineCount++;
+      _("  -> "); __(serialBuffer);
+
+      if (lineCount == returnLine) {
+        strcpy(buffer, serialBuffer);
+        hasLine = true;
+        // break;
+      }
+    } else if (!serialBuffer && loopCounter >= 40) {
+      break;
+    }
+
+    loopCounter++;
+    delay(50);
+  }
+
+  if (hasLine && validate != NULL) {
+    _("validate: "); __(validate);
+    if (strstr(buffer, validate)) return true;
+    return false;
+  }
+
+  return hasLine;
+}

@@ -1001,6 +1001,11 @@ class Trackio {
     bool sendCommand(char * cmd, char * res, int time);
     bool sendCommand(char * cmd, int time);
 
+    // #########################################################################
+    bool sendAt(char * cmd);
+    bool sendAt(char * cmd, int returnline);
+    bool sendAt(char * cmd, char * validate);
+    bool sendAt(char * cmd, int returnLine, char * validate);
   private:
 };
 
