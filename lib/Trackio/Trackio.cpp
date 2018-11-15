@@ -205,7 +205,6 @@ void Trackio::powerOff () {
 void Trackio::printInfo () {
   Trackio::getImei();
   Trackio::printIccid();
-  Trackio::printBattery();
   Trackio::getBattery();
 }
 
@@ -224,12 +223,6 @@ void Trackio::getImei () {
 }
 
 void Trackio::printIccid () {
-  Trackio::sendCommand((char *) "AT+CCID");
-}
-
-void Trackio::printBattery () {
-  char x[7] = "AT+CBC";
-  Trackio::sendCommand(x);
 }
 
 void Trackio::getBattery () {

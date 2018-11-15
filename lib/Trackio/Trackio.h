@@ -414,11 +414,6 @@ class Trackio {
     void printIccid();
 
     /**
-     * @brief Ejecuta comando AT+CBC para obtener lectura de voltage del modem
-     */
-    void printBattery();
-
-    /**
      * @brief Lee el estado de la batería
      *
      * Si cfg.battMode=1 se leerá batería del simcom (AT+CBC), solo VBAT
