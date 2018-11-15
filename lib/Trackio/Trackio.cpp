@@ -30,6 +30,9 @@
 #include <Adafruit_SleepyDog.h>
 #include "Trackio.h"
 
+#include <Readline.h>
+ReadLine readLine;
+
 #define OK         (char *) "OK"
 #define ERROR      (char *) "ERROR"
 #define READY      (char *) "READY"
