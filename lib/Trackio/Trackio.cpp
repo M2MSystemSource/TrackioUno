@@ -934,9 +934,7 @@ bool Trackio::sendCommand (char *cmd, char * validate, int time) {
   Trackio::_delay(time);
 
   // Esperamos respuesta comprobando el buffer cada 400 millis
-  Serial.println("Waiting modem response...");
   while (!SerialSim.available()) {
-    _(F("."));
     Trackio::_delay(100);
     count++;
     if (count > 100) {
