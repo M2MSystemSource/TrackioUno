@@ -208,6 +208,8 @@ void Trackio::powerOff () {
 void Trackio::printInfo () {
   Trackio::getImei();
   Trackio::printIccid();
+  Trackio::printPin();
+  Trackio::sendCommand((char *) "AT+GSV");
   Trackio::getBattery();
 }
 
