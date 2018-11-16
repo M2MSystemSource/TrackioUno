@@ -414,7 +414,7 @@ bool Trackio::openTcp () {
 void Trackio::closeTcp (int mode) {
   char cmd[15];
   sprintf(cmd, "AT+CIPCLOSE=%i", mode);
-  Trackio::sendCommand(cmd);
+  Trackio::sendAt(cmd, 1);
   Trackio::tcpOk = false;
   Trackio::listeningTcp = false;
   digitalWrite(LED, LOW);
