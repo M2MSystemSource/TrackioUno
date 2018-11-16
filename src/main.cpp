@@ -228,7 +228,10 @@ void transmitAlive () {
 
     trackio.listeningTcp = false;
     if ((int) cfg.opmode == (int) OP_TCP) {
-      trackio.transmit((char *) "%");
+      if (!trackio.transmit((char *) "%")) {
+        SerialMon.println(F("  == FAIL ALIVE"));
+        cfg.opmode = OP_STARTUP;
+      }
     }
   }
 }
