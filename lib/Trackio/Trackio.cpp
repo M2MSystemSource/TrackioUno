@@ -421,8 +421,7 @@ void Trackio::closeTcp (int mode) {
 }
 
 bool Trackio::tcpIsOpen () {
-  char cmd[20] = "AT+CIPSTATUS";
-  return Trackio::sendCommand(cmd, CONNECT_OK, 10);
+  return Trackio::sendAt((char *) "AT+CIPSTATUS", 2, CONNECT_OK);
 }
 
 bool Trackio::sayHello () {
