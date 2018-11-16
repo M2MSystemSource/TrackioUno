@@ -765,9 +765,9 @@ bool Trackio::gprsIsOpen () {
 // #############################################################################
 
 bool Trackio::powerOnGps () {
-  char x1[13] = "AT+CGNSPWR=1";
-  if (!Trackio::sendCommand(x1, (char *) "OK")) {
-    return false; }
+  if (!Trackio::sendAt((char *) "AT+CGNSPWR=1", 2, OK)) {
+    return false;
+  }
   Trackio::_delay(1500);
 
   // 2
@@ -775,8 +775,7 @@ bool Trackio::powerOnGps () {
   Trackio::_delay(1000);
 
   // 3
-  char x2[13] = "AT+CGPSRST=0";
-  Trackio::sendCommand(x2);
+  Trackio::sendAt((char *) "AT+CGPSRST=0", 1);
 
   return true;
 }
