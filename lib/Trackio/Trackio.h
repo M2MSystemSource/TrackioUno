@@ -278,11 +278,6 @@ class Trackio {
     bool cregOk;
 
     /**
-     * @brief Indica si se ha realizado GPS FIX
-     */
-    bool gpsFix;
-
-    /**
      * @brief Indica si el modem está conectado y funcionando
      *
      * checkModem() envía comando AT y ATE0, si hay respuesta válida
@@ -982,9 +977,6 @@ class Trackio {
      */
     bool sendCommand(char * cmd);
 
-    bool sendCommand(const char * cmd);
-
-
     /**
      * Version de sendCommand en la que se comprueba que la respuesta recibida
      * del comando AT contenga la cadena pasada por segundo parámetro. Es útil
@@ -999,11 +991,6 @@ class Trackio {
      * @return true Si obtuvo respuesta
      * @return false
      */
-    bool sendCommand(char * cmd, char * res);
-
-    // Especifica un tiempo antes de llamar a Serial.available()
-    bool sendCommand(char * cmd, char * res, int time);
-    bool sendCommand(char * cmd, int time);
 
     // #########################################################################
     bool sendAt(char * cmd);

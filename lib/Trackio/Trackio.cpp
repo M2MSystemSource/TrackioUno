@@ -126,7 +126,7 @@ void Trackio::loadConf () {
   owner = my_flash_store.read();
 
   if (owner.eeprom != RH_eeprom) {
-    __("Cargamos flash por primera vez");
+    __(F("Cargamos flash por primera vez"));
     // RECUERDA! No modifiques nada aquí, revisa `lib/trackio/static-conf.h`
     cfg.battMode = RH_battMode;
     cfg.deepSleep = RH_deepSleep;
@@ -142,7 +142,7 @@ void Trackio::loadConf () {
 
     Trackio::saveConf();
   } else {
-    __("La configuración ya existe.");
+    __(F("La configuración ya existe."));
     cfg = owner;
   }
 
@@ -195,7 +195,7 @@ bool Trackio::powerOn () {
 }
 
 void Trackio::powerOff () {
-  __("POWEROFF!");
+  __(F("POWEROFF!"));
   digitalWrite(LED, LOW);
 
   digitalWrite(GSM_PWREN, LOW);
@@ -217,12 +217,12 @@ void Trackio::getImei () {
   if (Trackio::sendAt((char *) "AT+CGSN", 2)) {
     if (strlen(buffer) == 15) {
       strcpy(Trackio::imei, buffer);
-      _(F("  == IMEI: ")); __(Trackio::imei);
+      ___(F("  == IMEI: "), Trackio::imei);
       return;
     }
   }
 
-  _(F("   == IMEI: ")); __("FAIL");
+  ___(F("   == IMEI: "), F("FAIL"));
 }
 
 void Trackio::printIccid () {
@@ -233,6 +233,7 @@ void Trackio::getBattery () {
   Trackio::vbat = 0;
   Trackio::vin = 0;
   Trackio::vsys_5v = 0;
+
   if (cfg.battMode == 1) {
     Trackio::getSimcomBattery();
   } else {
@@ -264,7 +265,7 @@ void Trackio::checkLowBattery () {
   if (low == 1) {
     // reset serial fails, evita reinicio antes de deep sleep
     modemSerialsFails = 0;
-    __("Entramos en LOW MODE");
+    __(F("Entramos en LOW MODE"));
     // establecemos el modo de bajo consumo y apagamos el simcom
     cfg.opmode = OP_LOW;
     Trackio::powerOff();
@@ -343,7 +344,7 @@ void Trackio::getSignalStrength () {
     split = strtok(buffer, " ");
     split = strtok(NULL, ",");
     strcpy(Trackio::gsm, split);
-    ___("  == signal: ", Trackio::gsm);
+    ___(F("  == signal: "), Trackio::gsm);
   }
 }
 
@@ -402,7 +403,7 @@ bool Trackio::openTcp () {
   char cmd[100];
   sprintf(cmd, "AT+CIPSTART=\"TCP\",\"%s\",\"%s\"", RH_SERVER, RH_PORT);
   if (!Trackio::sendAt(cmd, 1)) return false;
-  ___("  == CIPSTART: ", buffer);
+  ___(F("  == CIPSTART: "), buffer);
   Trackio::_delay(1000);
 
   // si ya está abierto Sim868 devolverá OK, sino READY CONNECT
@@ -416,8 +417,8 @@ bool Trackio::openTcp () {
   __(F("  == ERROR TCP"));
   openTcpFails++;
   if (openTcpFails == 3) {
-    __("El TCP ha fallado en multiples ocasiones - Hard Reset!");
-    while (1) {} // llamamos al watchdog.
+    __(F("El TCP ha fallado en multiples ocasiones - Hard Reset!"));
+    Trackio::hardReset();
   }
 
   return false;
@@ -451,7 +452,7 @@ bool Trackio::sayHello () {
   sprintf(hello, "%s|%d", x, opmode);
 
   if (Trackio::tcpOk && Trackio::transmit(hello)) {
-    _(F("buffer: ")); __(buffer);
+    ___(F("buffer: "), buffer);
     cfg.opmode = cfg.primaryOpMode;
     digitalWrite(LED, HIGH);
     return true;
@@ -469,21 +470,21 @@ bool Trackio::transmit (char * msg) {
   // enviamos los dos comandos, CIPSEND y el mensaje
   Trackio::sendCommand(cipsend);
   if (strstr(buffer, ERROR)) {
-    __("  == CIPSEND FAIL - abort");
+    __(F("  == CIPSEND FAIL - abort"));
     return false;
   }
 
   Trackio::sendCommand(msg);
 
+  // verificamos respuesta
   if (strstr(buffer, "SEND OK")) {
-    delay(100); // relax!
     // Comprobamos si el servidor nos ha devuelto una respuesta
     char * response = getTransmitResponse(buffer);
-    _(F("  == response: ")); __(response);
+    ___(F("  == response: "), response);
     if (isCommand(response)) {
       char * cmd = Trackio::extractCommand(response);
       if (Trackio::processCommand(cmd)) {
-        __(F("  == Command PROCESSED: ")); __(cmd);
+        ___(F("  == Command PROCESSED: "), cmd);
       }
     } else {
       __(F("  == Response is not a commnand"));
@@ -500,7 +501,7 @@ bool Trackio::transmit (char * msg) {
 
   Trackio::listeningTcp = false;
   Trackio::tcpOk = false;
-  __(F("ERROR SEND DATA!!"));
+  __(F("  == ERROR SEND"));
   return false;
 }
 
@@ -534,7 +535,6 @@ bool Trackio::transmitGps () {
 
   Trackio::resetGpsData();
 
-
   return Trackio::transmit(gpsdata);
 }
 
@@ -555,19 +555,18 @@ bool Trackio::tcpHasCommand () {
   bool gettingCommand = false;
   bool hasCommand = false;
   Trackio::emptyBuffer();
-
   if (SerialSim.available()) {
     while (SerialSim.available() > 0) {
       char x = SerialSim.read();
 
       if (35 == (int) x && !hasCommand) { // init command with #
         gettingCommand = true;
-        __("START command:");
+        __(F("START command:"));
       } else if (36 == (int) x) { // end command with $
         gettingCommand = false;
         hasCommand = true;
-        __("");
-        __("END command:");
+        __(F(""));
+        __(F("END command: "));
         Trackio::cmd[counter] = '\0';
       } else if (gettingCommand) {
         _(x);
@@ -579,7 +578,7 @@ bool Trackio::tcpHasCommand () {
     }
 
     if (hasCommand) {
-      _("Command: "); __(Trackio::cmd);
+      ___(F("Command: "), Trackio::cmd);
       return true;
     }
   }
@@ -595,8 +594,8 @@ bool Trackio::processCommand (char * cmd) {
 
   if (strcmp(command.property, "IO6") == 0) {
     cfg.GPIO6 = (strcmp(command.value, "ON") == 0) ? HIGH : LOW;
-    _(F("GUARDAMOS: ")); __(command.value);
-    _(F("GUARDAMOS: ")); __(cfg.GPIO6);
+    ___(F("GUARDAMOS: "), command.value);
+    ___(F("GUARDAMOS: "), cfg.GPIO6);
     Trackio::saveConf();
     return Trackio::cmd_setIO(IO6, command.value);
   }
@@ -607,14 +606,14 @@ bool Trackio::processCommand (char * cmd) {
   else {
     // finalmente no es válido...
     isValidCmd = false;
-    _(F("UNKNOW COMMAND: ")); __(command.property);
+    ___(F("UNKNOW COMMAND: "), command.property);
   }
 
   return isValidCmd;
 }
 
 Command Trackio::splitCommand (char * cmd) {
-  _(F("splitCommand: ")); _(cmd);
+  ___(F("splitCommand: "), cmd);
   Command command;
 
   char * split;
@@ -665,7 +664,7 @@ char * Trackio::extractCommand (char * cmd) {
   for (i = 1; i < len; i++) {
 
     if ((int) cmd[i] != 35 && (int) cmd[i] != 36) {
-      _(F("Extract Command i: ")); __(cmd[i]);
+      ___(F("Extract Command i: "), cmd[i]);
       __cmd[i] = '\0';
       __cmd[i - 1] = cmd[i];
     }
@@ -687,7 +686,7 @@ bool Trackio::cmd_setIO (int IO, char * status) {
 }
 
 bool Trackio::cmd_setConf (char * command) {
-  _(F("setConf: ")); __(command);
+  ___(F("setConf: "), command);
   const uint8_t maxConfs = 3;
   char confs[maxConfs][20] = {};
   uint8_t count = 0;
@@ -711,7 +710,7 @@ bool Trackio::cmd_setConf (char * command) {
 }
 
 bool Trackio::applyConf (char * conf) {
-  _(F("applyConf: ")); __(conf);
+  ___(F("applyConf: "), conf);
   char * cmd;
   char x[50];
   char prop[10];
@@ -817,7 +816,6 @@ void Trackio::parseSimcomTime (char * time) {
 
 void Trackio::parseGps (char * gps) {
   char * split = strtok(gps, ",");
-  Trackio::_delay(1000);
 
   split = strtok(NULL, ","); Trackio::gps.fix = atoi(split);
   split = strtok(NULL, ","); strcpy(Trackio::gps.time, split);
@@ -908,7 +906,7 @@ bool Trackio::sendCommand (char * cmd) {
       __(F("sendSerialAt failed"));
       modemSerialsFails++;
       if (modemSerialsFails > 10) {
-        __("Muchos fallos, reiniciando en 8 secs, o pulsa botón reset...");
+        __(F("Muchos fallos, reiniciando en 8 secs, o pulsa botón reset..."));
         delay(10000);
       }
       return false;
@@ -954,9 +952,9 @@ bool Trackio::sendAt (char * cmd, int returnLine, char * validate) {
   Trackio::emptyBuffer();
 
   // debug
-  __("");
+  __(F(""));
   __(F(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"));
-  _("sendAt > "); __(cmd);
+  _(F("sendAt > ")); __(cmd);
 
   // send command to the modem
   SerialSim.println(cmd);
@@ -970,11 +968,11 @@ bool Trackio::sendAt (char * cmd, int returnLine, char * validate) {
       if (lineCount == returnLine) {
         strcpy(buffer, serialBuffer);
         hasLine = true;
-        _("  -> "); __(serialBuffer);
+        ___(F("  -> "), serialBuffer); // -> es línea
         break;
       }
 
-      _("  -- "); __(serialBuffer);
+      ___(F("  -- "), serialBuffer); // -- no es linea
     }
 
     loopCounter++;
