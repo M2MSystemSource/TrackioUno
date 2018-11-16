@@ -103,6 +103,7 @@ void loop() {
  */
 void op_startup () {
   digitalWrite(LED, LOW);
+  firstPositionHasBeenSent = false;
 
   if (!trackio.begin()) {
     SerialMon.println(F("Trackio Critical FAIL - SIM868 can't start"));
