@@ -738,13 +738,13 @@ bool Trackio::enableGprs () {
     RH_APN, RH_APN_USER, RH_APN_PASS
   );
 
-  Trackio::sendCommand(apnCmd, 1000);
+  if (!Trackio::sendAt(apnCmd, 1, OK)) return false;
   Trackio::_delay(1000);
 
-  Trackio::sendCommand((char *) "AT+CIICR", 1000);
+  if (!Trackio::sendAt((char *) "AT+CIICR", 1, OK)) return false;
   Trackio::_delay(1000);
 
-  Trackio::sendCommand((char *) "AT+CIFSR", 100);
+  Trackio::sendAt((char *) "AT+CIFSR", 1, OK);
   Trackio::_delay(1000);
 
   return true;
