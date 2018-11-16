@@ -955,22 +955,30 @@ bool Trackio::sendAt (char * cmd, int returnLine, char * validate) {
         strcpy(buffer, serialBuffer);
         hasLine = true;
         _("  -> "); __(serialBuffer);
-        // break;
+        break;
       }
-    } else if (!serialBuffer && loopCounter >= 40) {
-      break;
+
       _("  -- "); __(serialBuffer);
     }
 
     loopCounter++;
-    delay(50);
+    Trackio::_delay(100);
   }
 
-  if (hasLine && validate != NULL) {
-    _("validate: "); __(validate);
-    if (strstr(buffer, validate)) return true;
+  if (!hasLine) {
+    __(F("Serial Failed"));
+    modemSerialsFails++;
+    if (modemSerialsFails > 10) {
+      Trackio::hardReset();
+    }
+
     return false;
+  } else {
+    modemSerialsFails = 0;
+    if (validate != NULL) {
+      if (!strstr(buffer, validate)) return false;
+    }
   }
 
-  return hasLine;
+  return true;
 }
