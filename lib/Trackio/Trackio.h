@@ -953,6 +953,11 @@ class Trackio {
      */
     void emptyBuffer();
 
+    /**
+     * @brief Forzar reset del micro con un loop infinito que hará saltar
+     * el watchdog
+     */
+    void hardReset();
     // #########################################################################
 
     void sleepNow(uint8_t times);

@@ -852,6 +852,10 @@ void Trackio::emptyBuffer () {
   memset(buffer, 0, sizeof buffer);
 }
 
+void Trackio::hardReset () {
+  while (1) {}
+}
+
 // #############################################################################
 
 void Trackio::sleepNow(uint8_t times) {
