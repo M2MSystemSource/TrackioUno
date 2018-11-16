@@ -797,24 +797,6 @@ void Trackio::resetGpsData () {
   Trackio::gps.fix = 0;
 }
 
-bool Trackio::gpsHasFix (char * gps) {
-  Trackio::gpsFix = false;
-
-  for (uint8_t i = 0; i <= 20; i++) {
-    if (i == 2) {
-      // ascii char 48 = 0
-      // ascii char 49 = 1
-      if ((int) gps[i] == 49) {
-        Trackio::gpsFix = true;
-        parseGps(gps);
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
-
 void Trackio::parseSimcomTime (char * time) {
   char * split;
   split = strtok(time, ".");
