@@ -366,6 +366,18 @@ bool Trackio::checkCreg () {
   return false;
 }
 
+void Trackio::sendSMS () {
+  __(F("SEND SMS"));
+  sendCommand((char *) "AT+CMGF=1");
+  Trackio::_delay(1000);
+  sendCommand((char *) "AT+CSCS=\"GSM\"");
+  Trackio::_delay(1000);
+  sendCommand((char *) "AT+CMGS=\"+34691612793\"");
+  Trackio::_delay(1000);
+  sendCommand((char *) "Mola Mazo!");
+  Trackio::_delay(1000);
+}
+
 bool Trackio::checkModem () {
   Trackio::atOk = false;
 
