@@ -351,10 +351,9 @@ bool Trackio::checkCreg () {
   if (!Trackio::atOk) return false;
   Trackio::cregOk = false;
 
-  // Verificamos el creg 10 veces
-  for (int i=0; i<10; i++) {
-    char x2[9] = "AT+CREG?";
-    Trackio::sendCommand(x2);
+  // Verificamos el creg 20 veces
+  for (int i=0; i<20; i++) {
+    if (!Trackio::sendAt((char *) "AT+CREG?", 1)) continue;
 
     if (strstr(buffer, ",5") || strstr(buffer, ",1")) {
       Trackio::cregOk = true;
