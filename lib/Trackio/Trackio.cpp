@@ -865,19 +865,7 @@ void Trackio::sleepNow(uint8_t times) {
 
 // #############################################################################
 
-bool Trackio::sendCommand (char * cmd, char * validate) {
-  return Trackio::sendCommand(cmd, validate, 0);
-}
-
-bool Trackio::sendCommand (char * cmd, int time) {
-  return Trackio::sendCommand(cmd, NULL, time);
-}
-
 bool Trackio::sendCommand (char * cmd) {
-  return Trackio::sendCommand(cmd, NULL, 0);
-}
-
-bool Trackio::sendCommand (char *cmd, char * validate, int time) {
   int count = 0;
   int indexPosition = 0;
 
@@ -894,7 +882,7 @@ bool Trackio::sendCommand (char *cmd, char * validate, int time) {
   SerialSim.println(cmd);
   SerialSim.flush();
 
-  Trackio::_delay(time);
+  Trackio::_delay(50);
 
   // Esperamos respuesta comprobando el buffer cada 400 millis
   while (!SerialSim.available()) {
@@ -920,14 +908,8 @@ bool Trackio::sendCommand (char *cmd, char * validate, int time) {
     Trackio::_delay(5);
   }
 
-  // comprobamos si hay datos que validar
-  if (validate != NULL && strlen(validate) >= 0) {
-    if (strstr(buffer, validate)) {
-      return true;
-    }
-    return false;
-  }
-
+  buffer[indexPosition] = '\0';
+  __(buffer);
   return true;
 }
 
