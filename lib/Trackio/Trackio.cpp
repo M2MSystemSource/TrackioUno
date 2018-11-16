@@ -217,12 +217,12 @@ void Trackio::getImei () {
   if (Trackio::sendAt((char *) "AT+CGSN", 2)) {
     if (strlen(buffer) == 15) {
       strcpy(Trackio::imei, buffer);
-      _(F("   -> IMEI: ")); __(Trackio::imei);
+      _(F("  == IMEI: ")); __(Trackio::imei);
       return;
     }
   }
 
-  _(F("   -> IMEI: ")); __("FAIL");
+  _(F("   == IMEI: ")); __("FAIL");
 }
 
 void Trackio::printIccid () {
@@ -286,23 +286,24 @@ void Trackio::checkLowBattery () {
 void Trackio::getAnalogBattery() {
   uint16_t lectura_mV;
 
-  __(F("--------------------------------------------------------------"));
+  __(F(""));
+  __(F(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"));
+  __(F("getAnalogBattery >"));
   digitalWrite(MUX_SW,LOW);
   delay(10);
   lectura_mV = (float) Trackio::readAnalogBatt(A3);
   Trackio::vbat = (float) (lectura_mV / VBAT_aux);
-  _(F("VBAT: ")); __(Trackio::vbat);
+  _(F("  == VBAT: ")); __(Trackio::vbat);
 
   lectura_mV = (float) Trackio::readAnalogBatt(A1);
   Trackio::vsys_5v = (float) (lectura_mV / VSYS_aux);
-  _(F("VSYS: ")); __(Trackio::vsys_5v);
+  _(F("  == VSYS: ")); __(Trackio::vsys_5v);
 
   digitalWrite(MUX_SW,HIGH);
   delay(100);
   lectura_mV = (float) Trackio::readAnalogBatt(A2);
   Trackio::vin = (float) (lectura_mV / VIN_aux);
-  _(F("VIN: ")); __(Trackio::vin);
-  __("");
+  _(F("  == VIN: ")); __(Trackio::vin);
 }
 
 uint16_t Trackio::readAnalogBatt(byte adc_pin) {
@@ -326,14 +327,14 @@ void Trackio::printPin () {
 // #############################################################################
 bool Trackio::checkStatus () {
   if (!Trackio::checkModem()) {
-    __(F("FAIL checkModem"));
+    __(F("  == FAIL checkModem"));
     return false;
   }
 
   Trackio::getSignalStrength();
 
   if (!Trackio::checkCreg()) {
-    __(F("FAIL checkCreg"));
+    __(F("  == FAIL checkCreg"));
     return false;
   }
 
@@ -410,12 +411,12 @@ bool Trackio::openTcp () {
   // si ya está abierto Sim868 devolverá OK, sino READY CONNECT
   if (strstr(response, OK) || strstr(response, READY)) {
     openTcpFails = 0;
-    __(F("TCP OPEN OK!"));
+    __(F("  == TCP OK"));
     Trackio::tcpOk = true;
     return true;
   }
 
-  __(F("ERROR TCP OPEN!"));
+  __(F("  == ERROR TCP"));
   openTcpFails++;
   if (openTcpFails == 3) {
     __("El TCP ha fallado en multiples ocasiones - Hard Reset!");
@@ -474,21 +475,21 @@ bool Trackio::transmit (char * msg) {
   Trackio::sendCommand(msg);
 
   if (strstr(buffer, "SEND OK")) {
-    __(F("SEND OK!!"));
     delay(100); // relax!
     // Comprobamos si el servidor nos ha devuelto una respuesta
     char * response = getTransmitResponse(buffer);
+    _(F("  == response: ")); __(response);
     if (isCommand(response)) {
-      _(F("response: ")); __(response);
       char * cmd = Trackio::extractCommand(response);
       if (Trackio::processCommand(cmd)) {
-        __(F("Command PROCESSED: ")); __(cmd);
+        __(F("  == Command PROCESSED: ")); __(cmd);
       }
     } else {
-      __(F("Response is not a commnand"));
+      __(F("  == Response is not a commnand"));
     }
 
     if (cfg.opmode == OP_TCP) {
+      __(F(""));
       __(F("Listening for TCP commands..."));
       Trackio::listeningTcp = true;
     }
@@ -576,9 +577,8 @@ bool Trackio::tcpHasCommand () {
       Trackio::_delay(1);
     }
 
-    _("Command: "); __(Trackio::cmd);
-
     if (hasCommand) {
+      _("Command: "); __(Trackio::cmd);
       return true;
     }
   }
@@ -772,7 +772,7 @@ bool Trackio::gprsIsOpen () {
     return true;
   }
 
-  __(F("ERROR GPS SERVICE!!"));
+  __(F("  == ERROR GPS"));
   return false;
 }
 
@@ -926,10 +926,9 @@ bool Trackio::sendCommand (char *cmd, char * validate, int time) {
   // vaciamos el buffer previo
   Trackio::emptyBuffer();
 
-  if (__DEBUG) {
-    __(F(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"));
-    _(F("SerialSim > ")); __(cmd);
-  }
+  __(F(""));
+  __(F(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"));
+  _(F("SerialSim > ")); __(cmd);
 
   // enviamos el comando al modem
   SerialSim.println(cmd);
@@ -959,11 +958,6 @@ bool Trackio::sendCommand (char *cmd, char * validate, int time) {
     buffer[indexPosition] = SerialSim.read();
     indexPosition++;
     Trackio::_delay(5);
-  }
-
-  if (__DEBUG) {
-    __(buffer);
-    __(F("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"));
   }
 
   // comprobamos si hay datos que validar
@@ -1011,19 +1005,19 @@ bool Trackio::sendAt (char * cmd, int returnLine, char * validate) {
   SerialSim.flush(); // ensure command is sent
 
   while (loopCounter < 40) {
-    // _(".");
     serialBuffer = readLine.feed(&SerialSim);
     if (serialBuffer != NULL) {
       lineCount++;
-      _("  -> "); __(serialBuffer);
 
       if (lineCount == returnLine) {
         strcpy(buffer, serialBuffer);
         hasLine = true;
+        _("  -> "); __(serialBuffer);
         // break;
       }
     } else if (!serialBuffer && loopCounter >= 40) {
       break;
+      _("  -- "); __(serialBuffer);
     }
 
     loopCounter++;
