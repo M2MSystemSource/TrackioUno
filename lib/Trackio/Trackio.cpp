@@ -456,6 +456,11 @@ bool Trackio::transmit (char * msg) {
 
   // enviamos los dos comandos, CIPSEND y el mensaje
   Trackio::sendCommand(cipsend);
+  if (strstr(buffer, ERROR)) {
+    __("  == CIPSEND FAIL - abort");
+    return false;
+  }
+
   Trackio::sendCommand(msg);
 
   if (strstr(buffer, "SEND OK")) {
