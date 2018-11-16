@@ -386,19 +386,15 @@ bool Trackio::openTcp () {
     return false;
   }
 
-  // abrimos puerto
+  // enviamos comando para abrir TCP
   char cmd[100];
   sprintf(cmd, "AT+CIPSTART=\"TCP\",\"%s\",\"%s\"", RH_SERVER, RH_PORT);
-  Trackio::sendCommand(cmd);
-  Trackio::_delay(2000);
-
-  // procesamos respuesta
-  char * response;
-  response = strtok(buffer, "\n"); // 1º empty line
-  response = strtok(NULL, "\n"); // 2º response
+  if (!Trackio::sendAt(cmd, 1)) return false;
+  ___("  == CIPSTART: ", buffer);
+  Trackio::_delay(1000);
 
   // si ya está abierto Sim868 devolverá OK, sino READY CONNECT
-  if (strstr(response, OK) || strstr(response, READY)) {
+  if (strstr(buffer, OK) || strstr(buffer, READY)) {
     openTcpFails = 0;
     __(F("  == TCP OK"));
     Trackio::tcpOk = true;
