@@ -783,21 +783,14 @@ bool Trackio::powerOnGps () {
 void Trackio::getGps () {
   if (cfg.gpsInterval < 1) return;
 
-  Trackio::sendCommand((char *) "AT+CLBS=1,1");
-
   Trackio::getBattery();
   Trackio::getSignalStrength();
 
-  char cmd[11] = "AT+CGNSINF";
-  Trackio::sendCommand(cmd);
-
-  char * token = strtok(buffer, "\n");
-  token = strtok(NULL, "\n");
-  char * token2 = strtok(token, " ");
-  token2 = strtok(NULL, " ");
-
-  Trackio::_delay(1000);
-  Trackio::parseGps(token2);
+  if (Trackio::sendAt((char *) "AT+CGNSINF", 1)) {
+    char * split = strtok(buffer, " ");
+    split = strtok(NULL, " ");
+    Trackio::parseGps(split);
+  }
 }
 
 void Trackio::resetGpsData () {
