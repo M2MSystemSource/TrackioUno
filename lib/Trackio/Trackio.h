@@ -37,6 +37,7 @@
 
 #define _(x) if (RH_DEBUG) SerialMon.print(x)
 #define __(x) if (RH_DEBUG) SerialMon.println(x)
+#define ___(x1, x2) if (RH_DEBUG) {_(x1); __(x2);}
 
 /**
  * @brief Modo operacional por defecto al arrancar el dispositivo
