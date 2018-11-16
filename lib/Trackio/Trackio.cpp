@@ -753,11 +753,8 @@ bool Trackio::enableGprs () {
 bool Trackio::gprsIsOpen () {
   if (!Trackio::cregOk) return false;
 
-  char x2[10] = "AT+CGATT?";
-  Trackio::sendCommand(x2);
-
-  if (strstr(buffer, "OK")) {
-    __(F("GPRS SERVICE OK!!"));
+  if (Trackio::sendAt((char *) "AT+CGATT?", 2, OK)) {
+    __(F("  == GPRS OK"));
     return true;
   }
 
