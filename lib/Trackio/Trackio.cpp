@@ -369,14 +369,9 @@ bool Trackio::checkCreg () {
 bool Trackio::checkModem () {
   Trackio::atOk = false;
 
-  if (Trackio::sendCommand((char *) "AT", OK)) {
+  if (Trackio::sendAt((char *) "AT", 2, OK)) {
     Trackio::atOk = true;
-
-    Trackio::_delay(100);
-
-    char x2[5] = "ATE0";
-    Trackio::sendCommand(x2);
-    Trackio::_delay(100);
+    Trackio::sendAt((char *) "ATE0");
   }
 
   return Trackio::atOk;
