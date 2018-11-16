@@ -230,6 +230,9 @@ void Trackio::printIccid () {
 }
 
 void Trackio::getBattery () {
+  Trackio::vbat = 0;
+  Trackio::vin = 0;
+  Trackio::vsys_5v = 0;
   if (cfg.battMode == 1) {
     Trackio::getSimcomBattery();
   } else {
