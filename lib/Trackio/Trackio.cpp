@@ -338,11 +338,12 @@ bool Trackio::checkStatus () {
 void Trackio::getSignalStrength () {
   char x[10] = "AT+CSQ";
 
-  if (Trackio::sendCommand(x, OK)) {
+  if (Trackio::sendAt(x, 1)) {
     char * split;
     split = strtok(buffer, " ");
     split = strtok(NULL, ",");
     strcpy(Trackio::gsm, split);
+    ___("  == signal: ", Trackio::gsm);
   }
 }
 
