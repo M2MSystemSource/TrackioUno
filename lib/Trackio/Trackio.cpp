@@ -315,8 +315,7 @@ uint16_t Trackio::readAnalogBatt(byte adc_pin) {
 }
 
 void Trackio::printPin () {
-  char x[9] = "AT+CPIN?";
-  Trackio::sendCommand(x);
+  Trackio::sendAt((char *) "AT+CPIN?", 1);
 }
 
 // #############################################################################
