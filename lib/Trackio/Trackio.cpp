@@ -243,23 +243,15 @@ void Trackio::getBattery () {
 }
 
 void Trackio::getSimcomBattery() {
-  char x[7] = "AT+CBC";
-  Trackio::sendCommand(x);
+  if (Trackio::sendAt((char *) "AT+CBC", 2)) {
+    // buffer = +CBC: 0,21,3571
+    char * split;
+    split = strtok(buffer, ",");
+    split = strtok(NULL, ","); // porcentage de batería
+    split = strtok(NULL, ","); // batería
 
-  char * split;
-  char * split2;
-  char cbc[50];
-
-  split = strtok(buffer, "\n"); // empty linea
-  split = strtok(NULL, "\n"); // result
-  strcpy(cbc, split);
-  split2 = strtok(cbc, ",");
-  split2 = strtok(NULL, ","); // porcentage de batería
-  split2 = strtok(NULL, ","); // batería
-
-  Trackio::vbat = atoi(split2);
-  Trackio::vin = 0;
-  Trackio::vsys_5v = 0;
+    Trackio::vbat = atoi(split);
+  }
 }
 
 void Trackio::checkLowBattery () {
