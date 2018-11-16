@@ -201,7 +201,7 @@ bool getGps (bool manageTcp) {
   }
 
   if (!trackio.transmitGps()) {
-    SerialMon.println(F("FAIL GPS TRANSMIT!!"));
+    SerialMon.println(F("  == FAIL GPS"));
     cfg.opmode = OP_STARTUP;
     return false;
   }
