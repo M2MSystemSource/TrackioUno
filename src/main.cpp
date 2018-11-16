@@ -90,22 +90,6 @@ void loop() {
 }
 
 /**
- * @brief https://www.arduino.cc/en/Reference/SerialEvent
- * Lo utilizamos principalmente en el modo OP_TCP para recibir los comandos
- * operacionales del server. Cuando el servidor escribe un comando (por TCP)
- * el simcom envía esos datos al Serial, esto hace saltar automáticamente este
- * método que a su vez llama a checkCommand() para verificar si los datos son
- * válidos
- */
-void serialEvent() {
-  SerialMon.println("TENEMOS COSAS!!");
-  checkCommand();
-}
-
-
-// #############################################################################
-
-/**
  * @brief Ejecución del modo OP_STARTUP
  *
  * El modo operacional OP_STARTUP se establece por defecto cuando iniciamos la
