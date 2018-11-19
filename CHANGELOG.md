@@ -1,4 +1,10 @@
 # Changelog
+
+* **0.3.0 - 2018-11-15**
+  * Refactoring para Arduino Zero (veníamos de Atmega328p): Añadidas librerías FlashStorage y Adafruit Sleepydog y ReadLine
+  * Nuevo método sendAt reemplaza sendCommand. Mejorada la comunicación con el modem
+  * Otros arreglos y limpieza
+
 * **0.2.5 - 2018-10-16**
   * Todos los valores de configuración se han transferido a `static-conf.h` para evitar modificaciones "innecesarias" en archivos CORE.
   * Añadidas 3 nuevos GPIOS configurables de forma remota, IO7, MOSI y MISO. Eliminada LED01 como configurable de forma remota
