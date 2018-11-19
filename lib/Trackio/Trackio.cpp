@@ -90,7 +90,9 @@ bool Trackio::begin() {
   SerialMon.begin(38400); while (!SerialMon) {}
   SerialSim.begin(38400); while (!SerialSim) {}
 
-  _(F("- Trackio ")); _(F(VERSION)); __(F(" START -"));
+  __(""); __("#############################################");
+  _(F("           - Trackio ")); _(F(VERSION)); __(F(" START -"));
+  __("#############################################"); __("");
 
   Trackio::blink();
   Trackio::loadConf();
