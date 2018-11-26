@@ -117,7 +117,6 @@ void Trackio::configureIOs () {
   pinMode(GSM_STATUS, INPUT);
   pinMode(IO6, OUTPUT); // actuador externo (rele, led...)
   pinMode(MUX_SW, OUTPUT);
-  digitalWrite(MUX_SW, HIGH);
 
   mV_step_used = mV_step_3V3;
 }
@@ -287,19 +286,18 @@ void Trackio::getAnalogBattery() {
   __(F(""));
   __(F(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"));
   __(F("getAnalogBattery >"));
-  digitalWrite(MUX_SW,LOW);
-  delay(10);
-  lectura_mV = (float) Trackio::readAnalogBatt(A3);
+
+  digitalWrite(MUX_SW, LOW); delay(10);
+  lectura_mV = (float) Trackio::readAnalogBatt(VBAT_PIN);
   Trackio::vbat = (float) (lectura_mV / VBAT_aux);
   _(F("  == VBAT: ")); __(Trackio::vbat);
 
-  lectura_mV = (float) Trackio::readAnalogBatt(A1);
+  lectura_mV = (float) Trackio::readAnalogBatt(VSYS_PIN);
   Trackio::vsys_5v = (float) (lectura_mV / VSYS_aux);
   _(F("  == VSYS: ")); __(Trackio::vsys_5v);
 
-  digitalWrite(MUX_SW,HIGH);
-  delay(100);
-  lectura_mV = (float) Trackio::readAnalogBatt(A2);
+  digitalWrite(MUX_SW, HIGH); delay(10);
+  lectura_mV = (float) Trackio::readAnalogBatt(VIN_PIN);
   Trackio::vin = (float) (lectura_mV / VIN_aux);
   _(F("  == VIN: ")); __(Trackio::vin);
 }
