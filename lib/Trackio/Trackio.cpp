@@ -599,9 +599,24 @@ bool Trackio::processCommand (char * cmd) {
     Trackio::saveConf();
     return Trackio::cmd_setIO(IO6, command.value);
   }
+  else if (strcmp(command.property, "IO0") == 0) return Trackio::cmd_setIO(IO0, command.value);
+  else if (strcmp(command.property, "IO1") == 0) return Trackio::cmd_setIO(IO1, command.value);
+  else if (strcmp(command.property, "IO2") == 0) return Trackio::cmd_setIO(IO2, command.value);
+  else if (strcmp(command.property, "IO3") == 0) return Trackio::cmd_setIO(IO3, command.value);
+  else if (strcmp(command.property, "IO4") == 0) return Trackio::cmd_setIO(IO4, command.value);
+  else if (strcmp(command.property, "IO5") == 0) return Trackio::cmd_setIO(IO5, command.value);
+  else if (strcmp(command.property, "IO6") == 0) return Trackio::cmd_setIO(IO6, command.value);
   else if (strcmp(command.property, "IO7") == 0) return Trackio::cmd_setIO(IO7, command.value);
+  else if (strcmp(command.property, "SDA") == 0) return Trackio::cmd_setIO(SDA, command.value);
+  else if (strcmp(command.property, "SCL") == 0) return Trackio::cmd_setIO(SCL, command.value);
+  else if (strcmp(command.property, "SCK") == 0) return Trackio::cmd_setIO(SCK, command.value);
+  else if (strcmp(command.property, "CS0") == 0) return Trackio::cmd_setIO(CS0, command.value);
+  else if (strcmp(command.property, "NMI") == 0) return Trackio::cmd_setIO(NMI, command.value);
+  else if (strcmp(command.property, "INT0") == 0) return Trackio::cmd_setIO(INT0, command.value);
+  else if (strcmp(command.property, "INT1") == 0) return Trackio::cmd_setIO(INT1, command.value);
   else if (strcmp(command.property, "MOSI") == 0) return Trackio::cmd_setIO(MOSI, command.value);
   else if (strcmp(command.property, "MISO") == 0) return Trackio::cmd_setIO(MISO, command.value);
+  else if (strcmp(command.property, "MUX_SW") == 0) return Trackio::cmd_setIO(MUX_SW, command.value);
   else if (strcmp(command.property, "CFG") == 0)  return Trackio::cmd_setConf(command.value);
   else {
     // finalmente no es válido...
