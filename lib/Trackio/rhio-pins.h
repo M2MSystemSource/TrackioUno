@@ -101,51 +101,52 @@
 #endif
 
 #ifdef PINS_ZEROSAMD21D
-  #define NMI 4
-  #define INT0 3
-  #define INT1 23
+  #define NMI    4
+  #define INT0   3
+  #define INT1   23
+  // #define CAPT0   ??   // PA28, pin not includded on Arduino IDE for original Zero
 
-  #define IO0 2
-  #define IO1 5
-  #define IO2 6
-  #define IO3 7
-  #define IO4 8
-  //#define IO5  // PA27, pin not includded on Arduino IDE for original Zero
-  #define IO6 24
-  #define IO7 22
+  #define IO0    2
+  #define IO1    5
+  #define IO2    6
+  #define IO3    7
+  #define IO4    8
+  #define IO5    -1   // PA27, pin not includded on Arduino IDE for original Zero
+  #define IO6    24
+  #define IO7    22
 
-  #define LED 9
-  #define PWM0 9
-  //#define PWM1  // PB03, pin not includded on Arduino IDE for original Zero
+  #define LED    9
+  #define PWM0   9
+  // #define PWM1   ??  // PB03, pin not includded on Arduino IDE for original Zero
 
-  #define RXD 0
-  #define TXD 1
-  //#define RTS  // PA31, pin not includded on Arduino IDE for original Zero
-  //#define CTS  // PA30, pin not includded on Arduino IDE for original Zero
-  #define RXD1 31
-  #define TXD1 30
+  #define RXD    0
+  #define TXD    1
+  // #define RTS    ??  // PA31, pin not includded on Arduino IDE for original Zero
+  // #define CTS    ??  // PA30, pin not includded on Arduino IDE for original Zero
+  #define RXD1   31
+  #define TXD1   30
 
-  #define SDA 20
-  #define SCL 21
-  #define MOSI 35
-  #define MISO 34
-  #define SCK 37
-  #define CS0 10
-  #define CS1 A5     // MUX_SW=LOW required
+  #define SDA    20
+  #define SCL    21
+  #define MOSI   35
+  #define MISO   34
+  #define SCK    37
+  #define CS0    10
+  #define CS1    A5  // MUX_SW=LOW required
   #define MEM_CS A4  // MUX_SW=LOW required
   #define uSD_CS A2  // MUX_SW=LOW required
-  //#define USB_P    // PA25, pin not includded on Arduino IDE for original Zero
-  //#define USB_N    // PA24, pin not includded on Arduino IDE for original Zero
+  // #define USB_P      ??  // PA25, pin not includded on Arduino IDE for original Zero
+  // #define USB_N     ??  // PA24, pin not includded on Arduino IDE for original Zero
   #define _1WIRE A3  // MUX_SW=LOW required
 
-  // #define AD0 A6
-  #define AD1 A4     // MUX_SW=HIGH required
-  #define AD2 A2     // MUX_SW=HIGH required
-  #define AD3 A5     // MUX_SW=HIGH required
-  #define DAC0 A0
+  #define AD0    A1
+  #define AD1    A4  // MUX_SW=HIGH required
+  #define AD2    A2  // MUX_SW=HIGH required
+  #define AD3    A5  // MUX_SW=HIGH required
+  #define DAC0   A0
 
-  #define MUX_SW 38 // ANALOG (MULTIPLEXOR) SWITCH
-  #define RSTOUT A3 // MUX_SW=HIGH required
+  #define MUX_SW 38  // ANALOG (MULTIPLEXOR) SWITCH
+#define RSTOUT A3 // MUX_SW=HIGH required
 #endif
 
 #ifdef PINS_UNO
