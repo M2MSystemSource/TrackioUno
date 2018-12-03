@@ -158,6 +158,9 @@ void op_startup () {
  * Trackio::timers.gps()
  */
 void op_tcp () {
+  #if RH_accel == true
+  trackio.checkAccel();
+  #endif
   checkCommand();
   transmitAlive();
   getGps(false); // obtiene GPS y envía posición a servidor
@@ -228,9 +231,10 @@ void transmitAlive () {
 
     trackio.listeningTcp = false;
     if ((int) cfg.opmode == (int) OP_TCP) {
-      if (!trackio.transmit((char *) "%")) {
+      char io6Status = digitalRead(IO6);
+      if (!trackio.transmit((char *) io6Status)) {
         SerialMon.println(F("  == FAIL ALIVE"));
-        cfg.opmode = OP_STARTUP;
+        // cfg.opmode = OP_STARTUP;
       }
     }
   }
