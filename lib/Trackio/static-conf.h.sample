@@ -58,3 +58,6 @@
 // #define PINS_MEGA2560
 // #define PINS_ZEROSAMD21D
 // #define PINS_UNO
+
+// #####################################################
+#define RH_ACCEL 1

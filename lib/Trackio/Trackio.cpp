@@ -51,6 +51,11 @@ const float VBAT_aux=0.3197278911564626;
 const float VIN_aux=0.0448901623686724;
 const float VSYS_aux=0.3197278911564626;
 
+int16_t AcX, AcY, AcZ, Tmp, GyX, GyY, GyZ;
+int accelCounter = 0;
+int accelThreshold = 1000;
+int triggerVal = 200;
+
 struct Conf cfg;
 
 FlashStorage(my_flash_store, Conf);
@@ -83,7 +88,6 @@ uint8_t modemSerialsFails = 0;
  */
 uint8_t openTcpFails = 0;
 
-
 bool Trackio::begin() {
   Trackio::configureIOs();
 
@@ -96,6 +100,10 @@ bool Trackio::begin() {
 
   Trackio::blink();
   Trackio::loadConf();
+  #if RH_accel == 1
+  Trackio::setupAccel();
+  Wire.begin();
+  #endif
 
   if (!Trackio::powerOn()) {
     return false;
@@ -140,6 +148,7 @@ void Trackio::loadConf () {
     cfg.requiredVbat = RH_requiredVbat;
     cfg.requiredVin = RH_requiredVin;
     cfg.requiredVsys5v = RH_requiredVsys5v;
+    cfg.accel = RH_accel;
 
     Trackio::saveConf();
   } else {
@@ -167,6 +176,7 @@ bool Trackio::powerOn () {
   Trackio::_delay(1000);
   digitalWrite(GSM_PWREN, HIGH);
 
+  // 1 -> pulso powerKey
   for (char i=0; i<5; i++) {
     gsm_status = digitalRead(GSM_STATUS);
     if (gsm_status== HIGH){
@@ -181,17 +191,21 @@ bool Trackio::powerOn () {
     }
   }
 
+  // 2
   if (!gsm_status) {
     // No se ha podido encender el modem. Revisar que GSM_PWREN, GSM_STATUS y
     // GSM_PWRKEY son los pines correctos.
     return false;
   }
 
+  // 3
   if (!Trackio::powerOnGps()) {
     // se quiere usar el GPS pero el poweron ha fallado, revisar pin GPS_EN
     // y conexión del módulo esclavo
     return false;
   }
+
+  // 4
   return true;
 }
 
@@ -677,7 +691,6 @@ char * Trackio::extractCommand (char * cmd) {
   int i;
 
   for (i = 1; i < len; i++) {
-
     if ((int) cmd[i] != 35 && (int) cmd[i] != 36) {
       ___(F("Extract Command i: "), cmd[i]);
       __cmd[i] = '\0';
@@ -890,6 +903,73 @@ void Trackio::sleepNow(uint8_t times) {
     Watchdog.sleep(8000);
   }
   __(F("------- WAKEUP -------"));
+}
+
+// #############################################################################
+
+void Trackio::setupAccel () {
+  Wire.begin();
+  Wire.beginTransmission(MPU6050_ADDRESS);
+  Wire.write(0x6B);  // PWR_MGMT_1 register
+  Wire.write(0);     // set to zero (wakes up the MPU-6050)
+  Wire.endTransmission(true);
+}
+
+void Trackio::readAccel () {
+  Wire.beginTransmission(MPU6050_ADDRESS);
+  Wire.write(0x3B);
+  Wire.endTransmission(false);
+  Wire.requestFrom(MPU6050_ADDRESS, 14, true);
+
+  AcX = Wire.read() << 8 | Wire.read();
+  AcY = Wire.read() << 8 | Wire.read();
+  AcZ = Wire.read() << 8 | Wire.read();
+  Tmp = Wire.read() << 8 | Wire.read();
+  GyX = Wire.read() << 8 | Wire.read();
+  GyY = Wire.read() << 8 | Wire.read();
+  GyZ = Wire.read() << 8 | Wire.read();
+
+  /*
+  Serial.print("AcX = "); Serial.print(AcX);
+  Serial.print(" | AcY = "); Serial.print(AcY);
+  Serial.print(" | AcZ = "); Serial.print(AcZ);
+  Serial.print(" | Tmp = "); Serial.print(Tmp / 340.00+36.53);  //equation for temperature in degrees C from datasheet
+  */
+
+  // ___(" | X: ", GyX); ___(" | Y: ", GyY); ___(" | Z: ", GyZ);
+}
+
+void Trackio::checkAccel () {
+  if (digitalRead(IO6)) return;
+  Trackio::readAccel();
+
+  if (GyX > accelThreshold || GyX < -accelThreshold || GyY > accelThreshold || GyY < -accelThreshold || GyZ > accelThreshold || GyZ < -accelThreshold) {
+    accelCounter++;
+  } else {
+    if (accelCounter > 0) accelCounter -= 10;
+    if (accelCounter <= 0) {
+      digitalWrite(MISO, LOW);
+    }
+  }
+
+  if (accelCounter >= triggerVal) {
+    Trackio::enableMovementAlert();
+  }
+
+  if (accelCounter > triggerVal) accelCounter = triggerVal;
+}
+
+// #############################################################################
+
+void Trackio::enableMovementAlert () {
+  if (digitalRead(IO6)) return;
+  __("ALERT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+  digitalWrite(MISO, HIGH);
+}
+
+void Trackio::disableMovementAlert () {
+  __("STOP!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+  digitalWrite(MISO, LOW);
 }
 
 // #############################################################################

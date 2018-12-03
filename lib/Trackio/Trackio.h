@@ -32,12 +32,19 @@
 #define VERSION "0.3.0b"
 
 #include <Arduino.h>
+#include "Wire.h"
 #include "static-conf.h"
 #include "rhio-pins.h"
+
 
 #define _(x) if (RH_DEBUG) SerialMon.print(x)
 #define __(x) if (RH_DEBUG) SerialMon.println(x)
 #define ___(x1, x2) if (RH_DEBUG) {_(x1); __(x2);}
+
+/**
+ * @brief Dirección I2C para el módulo MPU6050
+ */
+#define MPU6050_ADDRESS 0x68
 
 /**
  * @brief Modo operacional por defecto al arrancar el dispositivo
@@ -95,6 +102,28 @@ struct Command {
  * y guardar en memoria EEPROM, tras un reinicio se leeará la memoria.
  */
 struct Conf {
+  /**
+   * @brief Indica si se utiliza el acelerómetro para control de movimiento
+   *
+   * Si true el dispositivo emitirá un pulso modulado en el pin MISO cuando IO6
+   * sea LOW y el acelerómetro entre en movimiento.
+   *
+   * IO6 es la linea que indica si el dispositivo está encendido o apagado. En
+   * algunos casos, cuando el dispositivo está apagado, se requiere que este
+   * permanezca parado, sin movimiento. Si el acelerómetro detecta movimiento
+   * generara el pulso modulado sobre MISO, donde debería haber un buzzer
+   * conectado que se excitará y generará un sonido a modo de alarma.
+   *
+   * Por lo tanto esta variable será true cuando queramos una alarma por
+   * movimiento.
+   *
+   * IMPORTANTE: El loop del main.c es quién se encarga de realizar las lecturas
+   * del acelerómetro. En algunos momentos el loop queda bloqueada por otras
+   * operaciones. Esto puede ocasionar que durante algunos segundos se pierdan
+   * lecturas de acelerómetro y no se emita el correspondiente sonido. Un RTOS
+   * sería una solución ideal para esto.
+   */
+  bool accel;
 
   /**
    * @brief establece el modo en el que se leerán las baterías.
@@ -960,6 +989,17 @@ class Trackio {
     // #########################################################################
 
     void sleepNow(uint8_t times);
+
+    // #########################################################################
+
+    void setupAccel();
+    void readAccel();
+    void checkAccel();
+
+    // #########################################################################
+
+    void enableMovementAlert();
+    void disableMovementAlert();
 
     // #########################################################################
 
