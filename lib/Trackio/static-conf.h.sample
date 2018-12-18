@@ -1,48 +1,53 @@
 /**
  * @brief Numero de versión para los datos de configuración general.
  *
- * Al guardarse en eeprom necesitamos una variable de control que cargue los
+ * Al guardar en eeprom necesitamos una variable de control que cargue los
  * datos cuando sean modificados. Es decir, por defecto el sistema siempre
  * tratará de cargar la configuración de la memoría EEPROM a no ser que el valor
  * que tenga almacenado para `cfg.eeprom` sea distinto al que se haya definido
- * aquí. Por lo tanto, siempre que modifiquemos algín dato de la configuración
+ * aquí. Por lo tanto, siempre que modifiquemos algú dato de la configuración
  * general será recomendable aumentar el valor de RH_eeprom para asegurar que
  * la nueva configuración se aplica correctamente
  */
-#define RH_configVersion 1
+#define RH_configVersion 31
+
+/**
+ * @brief Método utilizado para lectura de baterías. Más detalles en
+ * `Conf.battMode` (Trackio.h)
+ */
+#define readBatteryMode 2
 
 // #####################################################
 // Configuración General. Determina el funcionamiento del dispositivo según
 // el Struct Conf en Trackio.h. Por favor, revisa la documentación en Trackio.h
 // para conocer el significado de cada parámetro
-#define RH_battMode 2
+// CUIDADO: la suma de todos los parámetros no puede superar 40 bytes
+//          (ver Trackio::confCRC())
+#define RH_battMode readBatteryMode
 #define RH_deepSleep false
 #define RH_eeprom RH_configVersion
+#define RH_externalWatchdog true
 #define RH_gpsInterval 5
 #define RH_opmode OP_STARTUP
-#define RH_primaryOpMode OP_TCP
 #define RH_sleep false
 #define RH_transmissionClock 10
+#define RH_primaryOpMode OP_TCP
 #define RH_requiredVbat 3650
 #define RH_requiredVin 0
 #define RH_requiredVsys5v 0
+#define RH_accel true
+#define RH_DEBUG 1
 
 // #####################################################
-// Tarjeta SIM y servidor remoto
-#define RH_APN "xxx"
-#define RH_APN_USER "xxx"
-#define RH_APN_PASS "xxx"
-#define RH_SERVER "xxx"
-#define RH_PORT "xxx"
-// #define RH_SERVER "83.33.35.49"
-// #define RH_PORT "3135"
+// SoftwareSerial PINS
 
-// #####################################################
-// Pins para lectura analógica de baterías, cambian en función de la PCB y/o MCU
-// TODO: esto debería estar dentro de los bloques de PCBs en rhom-pins.h
-#define VBAT_PIN A3
-#define VSYS_PIN A6
-#define VIN_PIN A2
+// halley box
+// #define RHIO_SOFT_RX 11
+// #define RHIO_SOFT_TX 12
+
+// deimos
+#define RHIO_SOFT_RX A5
+#define RHIO_SOFT_TX A4
 
 // #####################################################
 // Selección de placa base, incluido el socket donde se conectará el Sim868
@@ -50,14 +55,44 @@
 // #define DEIMOS_SOCKET2_MEGA2560
 // #define HALLEY_SOCKET2_MEGA2560
 // #define HALLEY_SOCKET2_UNO
-// #define DEIMOS_SOCKET1_ZEROSAMD21
+#define DEIMOS_SOCKET1_ZEROSAMD21
 // #define DEIMOS_SOCKET1_UNO
+// #define DEIMOS_SOCKET1_UNO_OLD
 
 // #####################################################
 // Selección de MCU
 // #define PINS_MEGA2560
-// #define PINS_ZEROSAMD21D
+#define PINS_ZEROSAMD21D
 // #define PINS_UNO
+// #define PINS_UNO_s200_OLD
 
 // #####################################################
-#define RH_ACCEL 1
+// Tarjeta SIM y servidor remoto
+// vodafone
+// #define RH_APN "inetd.vfes"
+// #define RH_APN_USER "1111"
+// #define RH_APN_PASS "1111"
+
+// orange
+#define RH_APN "m2m.orange.es"
+#define RH_APN_USER ""
+#define RH_APN_PASS ""
+
+// remote
+// #define RH_SERVER "45.76.37.219"
+// #define RH_PORT "4444"
+// local
+#define RH_SERVER "83.33.35.49"
+#define RH_PORT "3135"
+
+// #####################################################
+// Pins para lectura analógica de baterías, cambian en función de la PCB y/o MCU
+// TODO: esto debería estar dentro de los bloques de PCBs en rhom-pins.h
+// DUINO UNO DEIMOS
+// #define VBAT_PIN A3
+// #define VSYS_PIN A6
+// #define VIN_PIN  A2
+// DUINO ZERO DEIMOS
+#define VBAT_PIN A3
+#define VSYS_PIN A1
+#define VIN_PIN  A2
