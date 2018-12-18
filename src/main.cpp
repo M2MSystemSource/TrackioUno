@@ -231,8 +231,9 @@ void transmitAlive () {
 
     trackio.listeningTcp = false;
     if ((int) cfg.opmode == (int) OP_TCP) {
-      char io6Status = digitalRead(IO6);
-      if (!trackio.transmit((char *) io6Status)) {
+      char io6Status[1];
+      sprintf(io6Status, "%i", digitalRead(IO6));
+      if (!trackio.transmit(io6Status)) {
         SerialMon.println(F("  == FAIL ALIVE"));
         // cfg.opmode = OP_STARTUP;
       }
