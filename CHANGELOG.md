@@ -3,6 +3,7 @@
 * **0.3.0 - 2018-11-15**
   * Refactoring para Arduino Zero (veníamos de Atmega328p): Añadidas librerías FlashStorage y Adafruit Sleepydog y ReadLine
   * Nuevo método sendAt reemplaza sendCommand. Mejorada la comunicación con el modem
+  * Gestión de acelerometro y alarma de movimiento
   * Otros arreglos y limpieza
 
 * **0.2.5 - 2018-10-16**
