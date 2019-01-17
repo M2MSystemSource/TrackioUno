@@ -1,10 +1,22 @@
 # Changelog
 
+* **0.3.2b1 - 2019-01-16**
+  * static-conf.h: ADD UART_BUFFER_SIZE para asignar tamaño de la variable buffer en Trackio.cpp
+  * Trackio::sendCommand(): FIX bug overflow del buffer
+  * Trackio::gprsIsOpen(): FIX, no se procesaba correctamente la respuesta de AT+CGATT?
+  * main.cpp->transmitAlive(): FIX bug al reconectar el TCP, realizar registro en el gateway con Trackio::sayHello()
+  * Trackio::applyConf(): ADD transmissionClock, requiredVbat/Vin/Vsys configurables de forma remota
+  * Trackio::processCommand(): ADD comando "reset" realiza un hardReset -> #RST|1$
+  * Trackio::processCommand(): ADD comando "save" guarda la configuración -> #SAVE|1$
+  * Trackio::cmd_setConf(): eliminado el guardado automatica al recibir una nueva configuración remota
+  * Trackio::hardReset(): ADD reset del Sim868 con "AT+CFUN=0" previo al hardreset
+  * Trackio::openTcp(): ADD reset de Trackio::transmissionClockCounter
+
 * **0.3.1 - 2018-11-15**
   * FIX bug al procesar comando CIPSTART, se evaluaba la linea 1 en lugar de la 2
   * Añadido parametro timeout a sendAt
   * Reconectar TCP si hay fallo al enviar alive
-  * Trackio::sayHello() envia el número de versión del firmware
+  * Trackio::sayHello(): Enviar el número de versión del firmware
 
 * **0.3.0 - 2018-12-15**
   * Refactoring para Arduino Zero (veníamos de Atmega328p): Añadidas librerías FlashStorage y Adafruit Sleepydog y ReadLine
@@ -20,7 +32,6 @@
   * FIX. Trackio::openTcp() existía una comprobación redundante al verificar si el puerto estaba realmente abierto
   * Eliminadas algunas variables en desuso y ajustados los tipos de datos para reducir consumo de ram
   * Cambios menores.
-
 
 * **0.2.4 - 2018-10-15**
   * En modo OP_TCP se utiliza el método `serialEvent()` (main.cpp) de Arduino para evitar el pool constante al `Serial.available()` en el loop principal.
