@@ -427,7 +427,7 @@ bool Trackio::openTcp () {
     Trackio::tcpOk = true;
 
     // al iniciar el TCP reseteamos el contador de alives para empezar de nuevo
-    Trackio::transmissionClockCounter = 0
+    Trackio::transmissionClockCounter = 0;
 
     return true;
   }
