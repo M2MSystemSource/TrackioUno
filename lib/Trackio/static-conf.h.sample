@@ -96,3 +96,8 @@
 #define VBAT_PIN A3
 #define VSYS_PIN A1
 #define VIN_PIN  A2
+
+// Tamaño del buffer para el uart del modem. En general un valor de 120 debe
+// ser suficiente. En microcontroladores con generosa RAM, como el samd21,
+// se puede aumentar este por encima de 120.
+#define UART_BUFFER_SIZE 120

@@ -64,7 +64,7 @@ FlashStorage(my_flash_store, Conf);
  * @brief Almacena la lectura del Serial del modem. Se utiliza principalmente
  * en Trackio::sendCommand()
  */
-char buffer[120];
+char buffer[UART_BUFFER_SIZE];
 
 /**
  * @brief Indica si se mostrarán mensajes de log (solo afecta al método
