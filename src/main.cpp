@@ -243,6 +243,8 @@ void transmitAlive () {
           if (trackio.openTcp()) {
             // hemos abierto el TCP, seguimos
             __(F("  => EL TCP se ha abierto"));
+            // nos registramos para poder operar
+            trackio.sayHello()
           } else {
             __(F("  => NO se ha podido abrir TCP, reiniciamos"));
             cfg.opmode = OP_STARTUP;
