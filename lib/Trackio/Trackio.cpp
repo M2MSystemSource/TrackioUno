@@ -425,6 +425,10 @@ bool Trackio::openTcp () {
     openTcpFails = 0;
     __(F("  == TCP OK"));
     Trackio::tcpOk = true;
+
+    // al iniciar el TCP reseteamos el contador de alives para empezar de nuevo
+    Trackio::transmissionClockCounter = 0
+
     return true;
   }
 
