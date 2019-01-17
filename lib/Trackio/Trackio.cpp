@@ -763,11 +763,17 @@ bool Trackio::applyConf (char * conf) {
   cmd = strtok(NULL, ":");
   strcpy(value, cmd);
 
+  // > = 0.3.0
   if      (strcmp(prop, "dslp") == 0) cfg.deepSleep = atoi(value);
   else if (strcmp(prop, "gpsi") == 0) cfg.gpsInterval = atoi(value);
   else if (strcmp(prop, "op") == 0)   cfg.opmode = atoi(value);
   else if (strcmp(prop, "pop") == 0)  cfg.primaryOpMode = atoi(value);
   else if (strcmp(prop, "slp") == 0)  cfg.sleep = atoi(value);
+  // >= 0.3.2
+  else if (strcmp(prop, "tclk") == 0)  cfg.transmissionClock = atoi(value);
+  else if (strcmp(prop, "vbat") == 0)  cfg.requiredVbat = atoi(value);
+  else if (strcmp(prop, "vin") == 0)  cfg.requiredVin = atoi(value);
+  else if (strcmp(prop, "vsys") == 0)  cfg.requiredVsys5v = atoi(value);
 
   return true;
 }
