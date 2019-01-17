@@ -1,6 +1,12 @@
 # Changelog
 
-* **0.3.0 - 2018-11-15**
+* **0.3.1 - 2018-11-15**
+  * FIX bug al procesar comando CIPSTART, se evaluaba la linea 1 en lugar de la 2
+  * Añadido parametro timeout a sendAt
+  * Reconectar TCP si hay fallo al enviar alive
+  * Trackio::sayHello() envia el número de versión del firmware
+
+* **0.3.0 - 2018-12-15**
   * Refactoring para Arduino Zero (veníamos de Atmega328p): Añadidas librerías FlashStorage y Adafruit Sleepydog y ReadLine
   * Nuevo método sendAt reemplaza sendCommand. Mejorada la comunicación con el modem
   * Gestión de acelerometro y alarma de movimiento

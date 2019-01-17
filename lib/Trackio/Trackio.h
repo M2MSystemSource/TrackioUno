@@ -29,7 +29,7 @@
 
 #ifndef TRACKIO
 #define TRACKIO
-#define VERSION "0.3.0b"
+#define VERSION "0.3.1"
 
 #include <Arduino.h>
 #include "Wire.h"
