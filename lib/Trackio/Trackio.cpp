@@ -416,7 +416,7 @@ bool Trackio::openTcp () {
   // enviamos comando para abrir TCP
   char cmd[100];
   sprintf(cmd, "AT+CIPSTART=\"TCP\",\"%s\",\"%s\"", RH_SERVER, RH_PORT);
-  if (!Trackio::sendAt(cmd, 1)) return false;
+  if (!Trackio::sendAt(cmd, 2)) return false;
   ___(F("  == CIPSTART: "), buffer);
   Trackio::_delay(1000);
 
