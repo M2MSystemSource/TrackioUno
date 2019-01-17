@@ -640,6 +640,7 @@ bool Trackio::processCommand (char * cmd) {
   else if (strcmp(command.property, "MISO") == 0) return Trackio::cmd_setIO(MISO, command.value);
   else if (strcmp(command.property, "MUX_SW") == 0) return Trackio::cmd_setIO(MUX_SW, command.value);
   else if (strcmp(command.property, "CFG") == 0)  return Trackio::cmd_setConf(command.value);
+  else if (strcmp(command.property, "SAVE") == 0)  {Trackio::saveConf(); return true;}
   else {
     // finalmente no es válido...
     isValidCmd = false;
