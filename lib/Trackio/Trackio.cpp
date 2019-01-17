@@ -774,7 +774,8 @@ bool Trackio::applyConf (char * conf) {
 
 bool Trackio::enableGprs () {
   // Obtener el estado del servicio GPRS
-  if (!Trackio::gprsIsOpen()) {
+  if (Trackio::gprsIsOpen()) {
+    // GPRS ya está abierto
     return false;
   }
 
@@ -800,12 +801,12 @@ bool Trackio::enableGprs () {
 bool Trackio::gprsIsOpen () {
   if (!Trackio::cregOk) return false;
 
-  if (Trackio::sendAt((char *) "AT+CGATT?", 2, OK)) {
+  if (Trackio::sendAt((char *) "AT+CGATT?", 1, (char *) "+CGATT: 1")) {
     __(F("  == GPRS OK"));
     return true;
   }
 
-  __(F("  == ERROR GPS"));
+  __(F("  == GPRS CLOSED"));
   return false;
 }
 
