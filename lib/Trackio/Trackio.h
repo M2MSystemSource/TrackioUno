@@ -1037,6 +1037,8 @@ class Trackio {
     bool sendAt(char * cmd, int returnline);
     bool sendAt(char * cmd, char * validate);
     bool sendAt(char * cmd, int returnLine, char * validate);
+    bool sendAt(char * cmd, int returnLine, int timeout);
+    bool sendAt(char * cmd, int returnLine, char * validate, int timeout);
   private:
 };
 

@@ -1025,18 +1025,26 @@ bool Trackio::sendCommand (char * cmd) {
 // #############################################################################
 
 bool Trackio::sendAt (char * cmd) {
-  return sendAt(cmd, 2, NULL);
+  return sendAt(cmd, 2, NULL, 0);
 }
 
 bool Trackio::sendAt (char * cmd, char * validate) {
-  return sendAt(cmd, 2, NULL);
+  return sendAt(cmd, 2, NULL, 0);
 }
 
 bool Trackio::sendAt (char * cmd, int returnLine) {
-  return sendAt(cmd, returnLine, NULL);
+  return sendAt(cmd, returnLine, NULL, 0);
 }
 
 bool Trackio::sendAt (char * cmd, int returnLine, char * validate) {
+  return sendAt(cmd, returnLine, validate, 0);
+}
+
+bool Trackio::sendAt (char * cmd, int returnLine, int timeout) {
+  return sendAt(cmd, returnLine, NULL, timeout);
+}
+
+bool Trackio::sendAt (char * cmd, int returnLine, char * validate, int timeout) {
   int loopCounter = 0;
   int lineCount = 0;
   bool hasLine = false;
@@ -1054,6 +1062,9 @@ bool Trackio::sendAt (char * cmd, int returnLine, char * validate) {
   // send command to the modem
   SerialSim.println(cmd);
   SerialSim.flush(); // ensure command is sent
+
+  // algunos comandos requieren cierto tiempo antes de ser ejecutados
+  if (timeout) Trackio::_delay(timeout);
 
   while (loopCounter < 40) {
     serialBuffer = readLine.feed(&SerialSim);
