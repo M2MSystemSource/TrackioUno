@@ -743,7 +743,6 @@ bool Trackio::cmd_setConf (char * command) {
     }
   }
 
-  Trackio::saveConf();
   return true;
 }
 
