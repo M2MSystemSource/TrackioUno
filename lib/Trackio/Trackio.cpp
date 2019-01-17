@@ -900,6 +900,9 @@ void Trackio::emptyBuffer () {
 }
 
 void Trackio::hardReset () {
+  Trackio::sendCommand((char *) "AT+CFUN=0");
+  delay(1000);
+  Trackio::powerOff();
   while (1) {}
 }
 
