@@ -234,8 +234,20 @@ void transmitAlive () {
       char io6Status[1];
       sprintf(io6Status, "%i", digitalRead(IO6));
       if (!trackio.transmit(io6Status)) {
-        SerialMon.println(F("  == FAIL ALIVE"));
-        // cfg.opmode = OP_STARTUP;
+        // fallo al enviar el alive, intentamos recuperar la conexión o
+        // reiniciamos el sistema
+        __(F("  == FAIL ALIVE"));
+        if (!trackio.tcpIsOpen()) {
+          // hemos perdido la conexión.
+          __(F("  => El TCP está cerrado"));
+          if (trackio.openTcp()) {
+            // hemos abierto el TCP, seguimos
+            __(F("  => EL TCP se ha abierto"));
+          } else {
+            __(F("  => NO se ha podido abrir TCP, reiniciamos"));
+            cfg.opmode = OP_STARTUP;
+          }
+        }
       }
     }
   }
