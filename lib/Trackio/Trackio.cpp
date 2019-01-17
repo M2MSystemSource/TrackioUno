@@ -1019,11 +1019,13 @@ bool Trackio::sendCommand (char * cmd) {
   modemSerialsFails = 0; // reset contador
 
   // acomodamos la respuesta en buffer
-  while(SerialSim.available() > 0) {
+  __("START WHILE SENDCOMMAND");
+  while(SerialSim.available() > 0 && indexPosition < UART_BUFFER_SIZE) {
     buffer[indexPosition] = SerialSim.read();
     indexPosition++;
-    Trackio::_delay(5);
+    Trackio::_delay(1);
   }
+  __("END WHILE SENDCOMMAND");
 
   buffer[indexPosition] = '\0';
   __(buffer);
