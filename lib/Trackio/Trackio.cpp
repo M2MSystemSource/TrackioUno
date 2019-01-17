@@ -456,14 +456,18 @@ bool Trackio::sayHello () {
 
   // debemos transmitir al servidor el modo operacional, OP_TCP/AUTO
   int opmode = 1; // por defecto TCP
-  if (cfg.opmode == OP_AUTO) opmode = 2; // si no AUTO
+  if (cfg.primaryOpMode == OP_AUTO) opmode = 2; // si no AUTO
 
   // x debería ser prescindible, pero si inserto Trackio::imei
   // directamente en el sprintf se produce un segmentation fault error
   // que mis altas capacidades en el lenguaje C no logran entender
-  char x[20];
-  strcpy(x, Trackio::imei);
-  sprintf(hello, "%s|%d", x, opmode);
+  char imei[20];
+  strcpy(imei, Trackio::imei);
+  if (opmode == 1) {
+    sprintf(hello, "%s|%s", imei, VERSION);
+  } else {
+    sprintf(hello, "%s|%d", imei, opmode);
+  }
 
   if (Trackio::tcpOk && Trackio::transmit(hello)) {
     ___(F("buffer: "), buffer);
