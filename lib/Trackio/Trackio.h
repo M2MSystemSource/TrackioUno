@@ -33,8 +33,10 @@
 
 #include <Arduino.h>
 #include "Wire.h"
+
+#define S200_DUINO_ZERO_v1_0
+#include "rhio-pinmap.h"
 #include "static-conf.h"
-#include "rhio-pins.h"
 
 
 #define _(x) if (RH_DEBUG) SerialMon.print(x)
