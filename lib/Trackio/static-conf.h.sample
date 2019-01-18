@@ -9,7 +9,7 @@
  * general será recomendable aumentar el valor de RH_eeprom para asegurar que
  * la nueva configuración se aplica correctamente
  */
-#define RH_configVersion 31
+#define RH_configVersion 0
 
 /**
  * @brief Método utilizado para lectura de baterías. Más detalles en
@@ -26,7 +26,7 @@
 #define RH_battMode readBatteryMode
 #define RH_deepSleep false
 #define RH_eeprom RH_configVersion
-#define RH_externalWatchdog true
+#define RH_externalWatchdog false
 #define RH_gpsInterval 5
 #define RH_opmode OP_STARTUP
 #define RH_sleep false
@@ -35,69 +35,42 @@
 #define RH_requiredVbat 3650
 #define RH_requiredVin 0
 #define RH_requiredVsys5v 0
-#define RH_accel true
+#define RH_accel false
 #define RH_DEBUG 1
 
 // #####################################################
-// SoftwareSerial PINS
+// Configuración Serial (Solo Duino Zero)
+#define SerialSim Serial1 // modem
+#define SerialMon Serial  // debug
 
-// halley box
-// #define RHIO_SOFT_RX 11
-// #define RHIO_SOFT_TX 12
-
-// deimos
-#define RHIO_SOFT_RX A5
-#define RHIO_SOFT_TX A4
-
-// #####################################################
-// Selección de placa base, incluido el socket donde se conectará el Sim868
-// #define DEIMOS_SOCKET1_MEGA2560
-// #define DEIMOS_SOCKET2_MEGA2560
-// #define HALLEY_SOCKET2_MEGA2560
-// #define HALLEY_SOCKET2_UNO
-#define DEIMOS_SOCKET1_ZEROSAMD21
-// #define DEIMOS_SOCKET1_UNO
-// #define DEIMOS_SOCKET1_UNO_OLD
+// configuración SIM868 (Solo Duino Zero)
+#define GSM_PWREN  IO0
+#define GSM_PWRKEY IO1
+#define GPS_EN     IO2
+#define GSM_STATUS IO3
 
 // #####################################################
-// Selección de MCU
-// #define PINS_MEGA2560
-#define PINS_ZEROSAMD21D
-// #define PINS_UNO
-// #define PINS_UNO_s200_OLD
+// Placa base. La principal diferencia es que en Halley tenemos el ADC y por
+// ende hay que cargar la librería TLA2024 para la lectura de baterías
+#define RHIO_DEIMOS
+// #define RHIO_HALLEY
 
 // #####################################################
 // Tarjeta SIM y servidor remoto
-// vodafone
-// #define RH_APN "inetd.vfes"
-// #define RH_APN_USER "1111"
-// #define RH_APN_PASS "1111"
-
-// orange
-#define RH_APN "m2m.orange.es"
+#define RH_APN ""
 #define RH_APN_USER ""
 #define RH_APN_PASS ""
 
-// remote
-// #define RH_SERVER "45.76.37.219"
-// #define RH_PORT "4444"
-// local
-#define RH_SERVER "83.33.35.49"
-#define RH_PORT "3135"
+// Server
+#define RH_SERVER "127.0.0.1" // IP - no se ha probado dominio
+#define RH_PORT "5555"
 
 // #####################################################
-// Pins para lectura analógica de baterías, cambian en función de la PCB y/o MCU
-// TODO: esto debería estar dentro de los bloques de PCBs en rhom-pins.h
-// DUINO UNO DEIMOS
-// #define VBAT_PIN A3
-// #define VSYS_PIN A6
-// #define VIN_PIN  A2
-// DUINO ZERO DEIMOS
+// Pins para lectura analógica de baterías en placas Deimos.
+// Con HalleyBox no se utiliza, incluye un ADC y se utiliza la librería TLA2024
 #define VBAT_PIN A3
 #define VSYS_PIN A1
 #define VIN_PIN  A2
 
-// Tamaño del buffer para el uart del modem. En general un valor de 120 debe
-// ser suficiente. En microcontroladores con generosa RAM, como el samd21,
-// se puede aumentar este por encima de 120.
-#define UART_BUFFER_SIZE 120
+// Tamaño del buffer para el uart del modem.
+#define UART_BUFFER_SIZE 240
