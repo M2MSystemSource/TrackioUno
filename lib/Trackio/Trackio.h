@@ -581,12 +581,13 @@ class Trackio {
     bool gprsIsOpen();
 
     /**
-     * @brief
+     * @brief Habilita el GPRS. De no hacerlo el dispositivos no podrá iniciar
+     * el tcp para enviar datos.
      *
      * @return true
      * @return false
      */
-    bool enableGprs ();
+    bool openGprs ();
 
     // #########################################################################
 

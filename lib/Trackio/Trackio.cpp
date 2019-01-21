@@ -836,7 +836,7 @@ bool Trackio::applyConf (char * conf) {
 
 // #############################################################################
 
-bool Trackio::enableGprs () {
+bool Trackio::openGprs () {
   // Obtener el estado del servicio GPRS
   if (Trackio::gprsIsOpen()) {
     // GPRS ya está abierto

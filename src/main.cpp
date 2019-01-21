@@ -123,7 +123,7 @@ void op_startup () {
   // para OP_TCP y OP_AUTO iniciamos el registro de red gsm/gprs y puerto TCP
   if (cfg.primaryOpMode == OP_TCP || cfg.primaryOpMode == OP_AUTO) {
     trackio.checkStatus();
-    trackio.enableGprs();
+    trackio.openGprs();
     trackio.openTcp();
     trackio.sayHello();
   }
