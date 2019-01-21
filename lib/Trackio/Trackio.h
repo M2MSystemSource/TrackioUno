@@ -445,15 +445,25 @@ class Trackio {
      *
      * Si cfg.battMode=1 se leerá batería del simcom (AT+CBC), solo VBAT
      * Si cfg.battMode=2 se leerá batería de los pines analógicos.
-     * Las analógicas de VBAT como VIN están declaradas al inicio de Trackio.h
+     *  Las analógicas de VBAT como VIN están declaradas al inicio de Trackio.h
+     * Si cfg.battMode=3 estamos usando Halley, leemos baterías del ADC con
+     *  librería TLA2024
      *
      * El resultado se añadirá a la trama GPS en función de Trackio::Conf.addBattToGps
      */
     void getBattery();
 
     void getSimcomBattery();
+
+    // Deimos
     void getAnalogBattery();
     uint16_t readAnalogBatt(byte adc_pin);
+
+    // Halley
+    void getTLA2024Battery();
+    float readTLA2024Battery(uint8_t channel, float aux);
+    void configureTLA2024();
+
     void checkLowBattery();
 
     /**

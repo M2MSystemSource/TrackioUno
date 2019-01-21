@@ -51,6 +51,17 @@ const float VBAT_aux=0.3197278911564626;
 const float VIN_aux=0.0448901623686724;
 const float VSYS_aux=0.3197278911564626;
 
+// Datos para lectura de batería con HALLEY
+#if readBatteryMode == 3
+  #include "TLA2024.h"
+  TLA2024 adc = TLA2024();
+  unsigned char channel = AIN0;
+  const float VBAT_aux_HALLEY = 0.3197278911564626;
+  const float VIN_aux_HALLEY = 0.0231513138614829;
+  const float VSYS_aux_HALLEY = 0.3197278911564626;
+  const float EA0_aux_HALLEY = 0.3197278911564626;
+  const float ESENS_aux_HALLEY = 0.3595460072963113;
+#endif
 int16_t AcX, AcY, AcZ, Tmp, GyX, GyY, GyZ;
 int accelCounter = 0;
 int accelThreshold = 1000;
@@ -103,6 +114,10 @@ bool Trackio::begin() {
   #if RH_accel == 1
   Trackio::setupAccel();
   Wire.begin();
+  #endif
+
+  #if readBatteryMode == 3
+  Trackio::configureTLA2024();
   #endif
 
   if (!Trackio::powerOn()) {
@@ -251,8 +266,10 @@ void Trackio::getBattery () {
 
   if (cfg.battMode == 1) {
     Trackio::getSimcomBattery();
-  } else {
+  } else if (cfg.battMode == 2) {
     Trackio::getAnalogBattery();
+  } else if (cfg.battMode == 3) {
+    Trackio::getTLA2024Battery();
   }
 
   Trackio::checkLowBattery();
@@ -328,6 +345,47 @@ uint16_t Trackio::readAnalogBatt(byte adc_pin) {
   result = (uint16_t) reading_mV;
   return(result);
 }
+
+void Trackio::getTLA2024Battery () {
+  #if readBatteryMode == 3
+  __(F(""));
+  __(F(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"));
+  __(F("getTLA2024Battery >"));
+
+  Trackio::vbat = (int) Trackio::readTLA2024Battery(AIN0, VBAT_aux_HALLEY);
+  ___(F("  == VBAT: "), Trackio::vbat);
+
+  Trackio::vsys_5v = (int) Trackio::readTLA2024Battery(AIN2, VSYS_aux_HALLEY);
+  ___(F("  == VSYS: "), Trackio::vsys_5v);
+
+  Trackio::vin = (int) Trackio::readTLA2024Battery(AIN1, VIN_aux_HALLEY);
+  ___(F("  == VIN: "), Trackio::vin);
+  #else
+    __("ERROR: readBatteryMode debe ser =3 para usar Trackio::getTLA2024Battery()")
+  #endif
+}
+
+void Trackio::configureTLA2024 () {
+  #if readBatteryMode == 3
+  adc.begin();
+  adc.setFSR(20);  //-> ± 2.048 (default)
+  adc.setMux(4);   // point to channel AIN0
+  adc.setDR(1);    // DR = 250 SPS
+  adc.setMode(CONT);
+  #endif
+}
+
+float Trackio::readTLA2024Battery(uint8_t channel, float aux) {
+  #if readBatteryMode == 3
+    float result;
+    adc.setMux(channel);
+    float val = adc.analogRead();
+    result = (float) (val / aux);
+    return result;
+  #endif
+}
+
+// #############################################################################
 
 void Trackio::printPin () {
   Trackio::sendAt((char *) "AT+CPIN?", 1);
