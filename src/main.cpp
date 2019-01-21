@@ -83,7 +83,7 @@ void loop() {
   else if (cfg.opmode == OP_LOW) op_low();
   else if (cfg.opmode == OP_RST) {
     SerialMon.println("Reset Micro - Firing watchdog");
-    while (1) {};
+    trackio.hardReset();
   }
 
   trackio._delay(1);

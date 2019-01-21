@@ -1021,7 +1021,7 @@ bool Trackio::sendCommand (char * cmd) {
       modemSerialsFails++;
       if (modemSerialsFails > 10) {
         __(F("Muchos fallos, reiniciando en 8 secs, o pulsa botón reset..."));
-        delay(10000);
+        Trackio::hardReset();
       }
       return false;
     }
