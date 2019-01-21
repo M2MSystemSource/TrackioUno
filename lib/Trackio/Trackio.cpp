@@ -398,8 +398,6 @@ bool Trackio::checkStatus () {
     return false;
   }
 
-  Trackio::getSignalStrength();
-
   if (!Trackio::checkCreg()) {
     __(F("  == FAIL checkCreg"));
     return false;
@@ -426,6 +424,7 @@ bool Trackio::checkCreg () {
 
   // Verificamos el creg 20 veces
   for (int i=0; i<20; i++) {
+    Trackio::getSignalStrength();
     if (!Trackio::sendAt((char *) "AT+CREG?", 1)) continue;
 
     if (strstr(buffer, ",5") || strstr(buffer, ",1")) {
