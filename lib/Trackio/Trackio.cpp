@@ -38,15 +38,13 @@ ReadLine readLine;
 #define READY      (char *) "READY"
 #define CONNECT_OK (char *) "CONNECT OK"
 
-// OFFSETS para el cálculo en las lecturas analógicas de baterías
+// Datos para lectura de baterías con DEIMOS
 const float mV_step_5V=0.0048828125;
 const float mV_step_3V3=0.00322265625;
 const float mV_step_1V1=0.00107421875;
-float mV_step_used;
-
+float mV_step_used = mV_step_3V3;;
 float reading_mV;
 float aux_reading;
-
 const float VBAT_aux=0.3197278911564626;
 const float VIN_aux=0.0448901623686724;
 const float VSYS_aux=0.3197278911564626;
@@ -62,13 +60,15 @@ const float VSYS_aux=0.3197278911564626;
   const float EA0_aux_HALLEY = 0.3197278911564626;
   const float ESENS_aux_HALLEY = 0.3595460072963113;
 #endif
+
+// Acelerómetro
 int16_t AcX, AcY, AcZ, Tmp, GyX, GyY, GyZ;
 int accelCounter = 0;
 int accelThreshold = 1000;
 int triggerVal = 200;
 
+// Configuración general
 struct Conf cfg;
-
 FlashStorage(my_flash_store, Conf);
 
 /**
@@ -76,12 +76,6 @@ FlashStorage(my_flash_store, Conf);
  * en Trackio::sendCommand()
  */
 char buffer[UART_BUFFER_SIZE];
-
-/**
- * @brief Indica si se mostrarán mensajes de log (solo afecta al método
- * Trackio::sendComman())
- */
-bool __DEBUG = true;
 
 /**
  * @brief Cada vez que un comando AT falla se suma 1. Al llegar a X se hará
@@ -111,6 +105,7 @@ bool Trackio::begin() {
 
   Trackio::blink();
   Trackio::loadConf();
+
   #if RH_accel == 1
   Trackio::setupAccel();
   Wire.begin();
@@ -140,8 +135,6 @@ void Trackio::configureIOs () {
   pinMode(GSM_STATUS, INPUT);
   pinMode(IO6, OUTPUT); // actuador externo (rele, led...)
   pinMode(MUX_SW, OUTPUT);
-
-  mV_step_used = mV_step_3V3;
 }
 
 void Trackio::loadConf () {
@@ -235,6 +228,7 @@ void Trackio::powerOff () {
 }
 
 // #############################################################################
+
 void Trackio::printInfo () {
   Trackio::getImei();
   Trackio::printIccid();
@@ -255,9 +249,15 @@ void Trackio::getImei () {
   ___(F("   == IMEI: "), F("FAIL"));
 }
 
+void Trackio::printPin () {
+  Trackio::sendAt((char *) "AT+CPIN?", 1);
+}
+
 void Trackio::printIccid () {
   Trackio::sendAt((char *) "AT+CCID");
 }
+
+// #############################################################################
 
 void Trackio::getBattery () {
   Trackio::vbat = 0;
@@ -311,7 +311,7 @@ void Trackio::checkLowBattery () {
   }
 }
 
-void Trackio::getAnalogBattery() {
+void Trackio::getAnalogBattery () {
   uint16_t lectura_mV;
 
   __(F(""));
@@ -333,7 +333,7 @@ void Trackio::getAnalogBattery() {
   _(F("  == VIN: ")); __(Trackio::vin);
 }
 
-uint16_t Trackio::readAnalogBatt(byte adc_pin) {
+uint16_t Trackio::readAnalogBatt (byte adc_pin) {
   int readingADC;
   float reading_mV;
   uint16_t result;
@@ -361,7 +361,7 @@ void Trackio::getTLA2024Battery () {
   Trackio::vin = (int) Trackio::readTLA2024Battery(AIN1, VIN_aux_HALLEY);
   ___(F("  == VIN: "), Trackio::vin);
   #else
-    __("ERROR: readBatteryMode debe ser =3 para usar Trackio::getTLA2024Battery()")
+    __("ERROR: readBatteryMode debe ser =3 para usar Trackio::getTLA2024Battery()");
   #endif
 }
 
@@ -382,13 +382,9 @@ float Trackio::readTLA2024Battery(uint8_t channel, float aux) {
     float val = adc.analogRead();
     result = (float) (val / aux);
     return result;
+  #else
+    return 0;
   #endif
-}
-
-// #############################################################################
-
-void Trackio::printPin () {
-  Trackio::sendAt((char *) "AT+CPIN?", 1);
 }
 
 // #############################################################################
@@ -426,7 +422,6 @@ bool Trackio::checkCreg () {
   for (int i=0; i<20; i++) {
     Trackio::getSignalStrength();
     if (!Trackio::sendAt((char *) "AT+CREG?", 1)) continue;
-
     if (strstr(buffer, ",5") || strstr(buffer, ",1")) {
       Trackio::cregOk = true;
       return true;
@@ -436,18 +431,6 @@ bool Trackio::checkCreg () {
   }
 
   return false;
-}
-
-void Trackio::sendSMS () {
-  __(F("SEND SMS"));
-  sendCommand((char *) "AT+CMGF=1");
-  Trackio::_delay(1000);
-  sendCommand((char *) "AT+CSCS=\"GSM\"");
-  Trackio::_delay(1000);
-  sendCommand((char *) "AT+CMGS=\"+34691612793\"");
-  Trackio::_delay(1000);
-  sendCommand((char *) "Mola Mazo!");
-  Trackio::_delay(1000);
 }
 
 bool Trackio::checkModem () {
@@ -1087,13 +1070,11 @@ bool Trackio::sendCommand (char * cmd) {
   modemSerialsFails = 0; // reset contador
 
   // acomodamos la respuesta en buffer
-  __("START WHILE SENDCOMMAND");
   while(SerialSim.available() > 0 && indexPosition < UART_BUFFER_SIZE) {
     buffer[indexPosition] = SerialSim.read();
     indexPosition++;
     Trackio::_delay(1);
   }
-  __("END WHILE SENDCOMMAND");
 
   buffer[indexPosition] = '\0';
   __(buffer);
@@ -1144,7 +1125,7 @@ bool Trackio::sendAt (char * cmd, int returnLine, char * validate, int timeout) 
   // algunos comandos requieren cierto tiempo antes de ser ejecutados
   if (timeout) Trackio::_delay(timeout);
 
-  while (loopCounter < 40) {
+  while (loopCounter < 80) {
     serialBuffer = readLine.feed(&SerialSim);
     if (serialBuffer != NULL) {
       lineCount++;

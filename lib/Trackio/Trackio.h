@@ -997,8 +997,6 @@ class Trackio {
      */
     void hardReset();
 
-    void sendSMS();
-
     // #########################################################################
 
     void sleepNow(uint8_t times);
