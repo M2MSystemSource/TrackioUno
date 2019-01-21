@@ -626,7 +626,7 @@ bool Trackio::processCommand (char * cmd) {
   else if (strcmp(command.property, "IO2") == 0) return Trackio::cmd_setIO(IO2, command.value);
   else if (strcmp(command.property, "IO3") == 0) return Trackio::cmd_setIO(IO3, command.value);
   else if (strcmp(command.property, "IO4") == 0) return Trackio::cmd_setIO(IO4, command.value);
-  else if (strcmp(command.property, "IO5") == 0) return Trackio::cmd_setIO(IO5, command.value);
+  // else if (strcmp(command.property, "IO5") == 0) return Trackio::cmd_setIO(IO5, command.value); // no disponible en Arduino Zero
   else if (strcmp(command.property, "IO6") == 0) return Trackio::cmd_setIO(IO6, command.value);
   else if (strcmp(command.property, "IO7") == 0) return Trackio::cmd_setIO(IO7, command.value);
   else if (strcmp(command.property, "SDA") == 0) return Trackio::cmd_setIO(SDA, command.value);
