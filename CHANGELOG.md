@@ -1,6 +1,6 @@
 # Changelog
 
-* **0.3.2b1 - 2019-01-16**
+* **0.3.2 - 2019-01-21**
   * static-conf.h: ADD UART_BUFFER_SIZE para asignar tamaño de la variable buffer en Trackio.cpp
   * Trackio::sendCommand(): FIX bug overflow del buffer
   * Trackio::gprsIsOpen(): FIX, no se procesaba correctamente la respuesta de AT+CGATT?
@@ -11,6 +11,10 @@
   * Trackio::cmd_setConf(): eliminado el guardado automatica al recibir una nueva configuración remota
   * Trackio::hardReset(): ADD reset del Sim868 con "AT+CFUN=0" previo al hardreset
   * Trackio::openTcp(): ADD reset de Trackio::transmissionClockCounter
+  * Trackio::hardReset(): FIX uso correcto de hardReset()
+  * Trackio.cpp/h: ADD soporte para lectura de baterías con HalleyBox
+  * Trackio::enableGprs() renombrado como Trackio::openGprs()
+  * Minor Fixes
 
 * **0.3.1 - 2018-11-15**
   * FIX bug al procesar comando CIPSTART, se evaluaba la linea 1 en lugar de la 2
