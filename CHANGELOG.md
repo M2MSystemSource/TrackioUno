@@ -9,11 +9,12 @@
   * Trackio::processCommand(): ADD comando "reset" realiza un hardReset -> #RST|1$
   * Trackio::processCommand(): ADD comando "save" guarda la configuración -> #SAVE|1$
   * Trackio::cmd_setConf(): eliminado el guardado automatica al recibir una nueva configuración remota
-  * Trackio::hardReset(): ADD reset del Sim868 con "AT+CFUN=0" previo al hardreset
+  * Trackio::hardReset(): ADD reset del Sim868 con "Trackio::powerOff()" previo al hardreset
   * Trackio::openTcp(): ADD reset de Trackio::transmissionClockCounter
   * Trackio::hardReset(): FIX uso correcto de hardReset()
   * Trackio.cpp/h: ADD soporte para lectura de baterías con HalleyBox
   * Trackio::enableGprs() renombrado como Trackio::openGprs()
+  * Trackio::begin(): Cambio en secuencia de arranque para ejecutar ATE0
   * Minor Fixes
 
 * **0.3.1 - 2018-11-15**
