@@ -29,7 +29,7 @@
   * Gestión de acelerometro y alarma de movimiento
   * Otros arreglos y limpieza
 
-* **0.2.6 - 2018-10-18*
+* **0.2.6 - 2018-10-18**
   * FIX IO7, MOSI y MISO no estaban inicializadas como outputs
 
 * **0.2.5 - 2018-10-16**
