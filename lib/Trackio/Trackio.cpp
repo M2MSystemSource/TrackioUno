@@ -106,6 +106,21 @@ bool Trackio::begin() {
   Trackio::blink();
   Trackio::loadConf();
 
+  // encendemos el modem
+  if (!Trackio::powerOn()) {
+    return false;
+  }
+
+  // comprobamos que se envian comandos AT
+  if (!Trackio::checkModem()) {
+    return false;
+  }
+
+  if (!Trackio::powerOnGps()) {
+    // se quiere usar el GPS pero el poweron ha fallado, revisar pin GPS_EN
+    // y conexión del módulo esclavo
+    return false;
+  }
   #if RH_accel == 1
   Trackio::setupAccel();
   Wire.begin();
@@ -114,10 +129,6 @@ bool Trackio::begin() {
   #if readBatteryMode == 3
   Trackio::configureTLA2024();
   #endif
-
-  if (!Trackio::powerOn()) {
-    return false;
-  }
 
   Trackio::transmissionClockCounter = 0;
   Trackio::printInfo();
@@ -207,13 +218,6 @@ bool Trackio::powerOn () {
   }
 
   // 3
-  if (!Trackio::powerOnGps()) {
-    // se quiere usar el GPS pero el poweron ha fallado, revisar pin GPS_EN
-    // y conexión del módulo esclavo
-    return false;
-  }
-
-  // 4
   return true;
 }
 
@@ -238,7 +242,7 @@ void Trackio::printInfo () {
 }
 
 void Trackio::getImei () {
-  if (Trackio::sendAt((char *) "AT+CGSN", 2)) {
+  if (Trackio::sendAt((char *) "AT+CGSN", 1)) {
     if (strlen(buffer) == 15) {
       strcpy(Trackio::imei, buffer);
       ___(F("  == IMEI: "), Trackio::imei);
@@ -254,7 +258,8 @@ void Trackio::printPin () {
 }
 
 void Trackio::printIccid () {
-  Trackio::sendAt((char *) "AT+CCID");
+  Trackio::sendAt((char *) "AT+CCID", 1);
+  ___("  == ICCID: ", buffer);
 }
 
 // #############################################################################
@@ -389,11 +394,6 @@ float Trackio::readTLA2024Battery(uint8_t channel, float aux) {
 
 // #############################################################################
 bool Trackio::checkStatus () {
-  if (!Trackio::checkModem()) {
-    __(F("  == FAIL checkModem"));
-    return false;
-  }
-
   if (!Trackio::checkCreg()) {
     __(F("  == FAIL checkCreg"));
     return false;
@@ -436,9 +436,10 @@ bool Trackio::checkCreg () {
 bool Trackio::checkModem () {
   Trackio::atOk = false;
 
-  if (Trackio::sendAt((char *) "AT", 2, OK)) {
+  Trackio::sendAt((char *) "ATE0", 1);
+
+  if (Trackio::sendAt((char *) "AT", 1, OK)) {
     Trackio::atOk = true;
-    Trackio::sendAt((char *) "ATE0");
   }
 
   return Trackio::atOk;
@@ -860,7 +861,7 @@ bool Trackio::gprsIsOpen () {
 // #############################################################################
 
 bool Trackio::powerOnGps () {
-  if (!Trackio::sendAt((char *) "AT+CGNSPWR=1", 2, OK)) {
+  if (!Trackio::sendAt((char *) "AT+CGNSPWR=1", 1, OK)) {
     return false;
   }
   Trackio::_delay(1500);
