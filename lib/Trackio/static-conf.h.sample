@@ -1,17 +1,4 @@
 /**
- * @brief Numero de versión para los datos de configuración general.
- *
- * Al guardar en eeprom necesitamos una variable de control que cargue los
- * datos cuando sean modificados. Es decir, por defecto el sistema siempre
- * tratará de cargar la configuración de la memoría EEPROM a no ser que el valor
- * que tenga almacenado para `cfg.eeprom` sea distinto al que se haya definido
- * aquí. Por lo tanto, siempre que modifiquemos algú dato de la configuración
- * general será recomendable aumentar el valor de RH_eeprom para asegurar que
- * la nueva configuración se aplica correctamente
- */
-#define RH_configVersion 0
-
-/**
  * @brief Método utilizado para lectura de baterías. Más detalles en
  * `Conf.battMode` (Trackio.h)
  */

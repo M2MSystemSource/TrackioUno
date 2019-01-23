@@ -153,12 +153,12 @@ void Trackio::loadConf () {
   Conf owner;
   owner = my_flash_store.read();
 
-  if (owner.eeprom != RH_eeprom) {
+  if (!owner.eeprom != 1) {
     __(F("Cargamos flash por primera vez"));
     // RECUERDA! No modifiques nada aquí, revisa `lib/trackio/static-conf.h`
     cfg.battMode = RH_battMode;
     cfg.deepSleep = RH_deepSleep;
-    cfg.eeprom = RH_eeprom;
+    cfg.eeprom = 1;
     cfg.gpsInterval = RH_gpsInterval;
     cfg.opmode = RH_opmode;
     cfg.primaryOpMode = RH_primaryOpMode;
