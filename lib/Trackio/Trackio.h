@@ -234,7 +234,60 @@ struct Conf {
    */
   unsigned int transmissionClock;
 
+  /**
+   * @brief Intervalo de tiempo para enviar datos al servidor. Se utiliza en
+   * OP_AUTO.
+   */
+  unsigned long tickTimer;
+
+  /**
+   * @brief Establece si al momento de enviar un dato (GPS, Sensing) se envía
+   * automaticamente al server o se guarda en el log
+   *
+   * En caso de true se enviará al server y no se guardará nada, si false
+   * se guardará el log y se transmitirá según `cfg.transmiLog`
+   */
+  bool transmitAlways;
+
+  /**
+   * @brief Indica cuantos datos se guardan en memoría flash para ser enviados
+   * más adelante.
+   *
+   * Hay un límite de 50 datos, cada dato puede contener 100 bytes. Al llegar
+   * al número indicado aquí se iniciará la transmisión.
+   */
+  int transmitLog;
+
+  /**
+   * @brief Almacena el estado de IO6 (HIGH/LOW)
+   *
+   * IO6 tiene un tratamiento especial al resto de GPIOS. Se utiliza como
+   * actuador externo, por ejemplo un relé, para indicar si algo está encendido
+   * o apagado. Desde la plataforma de M2Mss se puede hacer uso de los botones
+   * ON/OFF de cada dispositivo para activar/desactivar esta GPIO de forma
+   * remota.
+   *
+   * El estado de esta GPIO se almacena en memoria EEPROM cada vez que se
+   * modifica. De este modo el dispositivo, ante un reinicio, puede volver a
+   * activar/desactivar el actuador externo.
+   */
   byte GPIO6;
+
+  bool useDigitalTemp;
+  bool useAnalogTemp;
+  bool useCo2;
+  bool useGps;
+  bool useLocation;
+  bool useAltitude;
+  bool useSpeed;
+  bool useCog;
+  bool useSats;
+  bool useHDOP;
+  bool useGSM;
+  bool useBatt;
+  bool useVBAT;
+  bool useVSYS;
+  bool useVIN;
 };
 
 extern struct Conf cfg;
