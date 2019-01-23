@@ -7,38 +7,60 @@
 // #####################################################
 // Configuración General. Determina el funcionamiento del dispositivo según
 // el Struct Conf en Trackio.h. Por favor, revisa la documentación en Trackio.h
-// para conocer el significado de cada parámetro
-// CUIDADO: la suma de todos los parámetros no puede superar 40 bytes
-//          (ver Trackio::confCRC())
+// para conocer el significado de cada parámetro.
+#define RH_accel false
 #define RH_battMode readBatteryMode
-#define RH_deepSleep false
-#define RH_eeprom RH_configVersion
 #define RH_externalWatchdog false
-#define RH_gpsInterval 5
 #define RH_opmode OP_STARTUP
-#define RH_sleep false
-#define RH_transmissionClock 10
 #define RH_primaryOpMode OP_TCP
 #define RH_requiredVbat 3650
 #define RH_requiredVin 0
 #define RH_requiredVsys5v 0
-#define RH_accel false
 #define RH_DEBUG 1
 
+// OP_TCP
+#define RH_gpsInterval 5
+#define RH_transmissionClock 10
+
+// OP_AUTO
+#define RH_deepSleep false
+#define RH_sleep false
+#define RH_tickTimer 60
+#define RH_transmitAlways true
+#define RH_transmitLog 50
+
+// Configuración de mensaje. Se indican que parámetros se obtendrán en cada
+// RH_tickTimer. Los datos obtenidos se enviarán o se guardarán en log en
+// función RH_transmitAlways
+#define RH_useDigitalTemp false
+#define RH_useAnalogTemp false
+#define RH_useCo2 false
+#define RH_useGps false
+#define RH_useLocation false
+#define RH_useAltitude false
+#define RH_useSpeed false
+#define RH_useCog false
+#define RH_useSats false
+#define RH_useHDOP false
+#define RH_useGSM false
+#define RH_useBatt false
+#define RH_useVBAT false
+#define RH_useVSYS false
+#define RH_useVIN false
+
 // #####################################################
-// Configuración Serial (Solo Duino Zero)
+// Configuración Serial
 #define SerialSim Serial1 // modem
 #define SerialMon Serial  // debug
 
-// configuración SIM868 (Solo Duino Zero)
+// configuración SIM868
 #define GSM_PWREN  IO0
 #define GSM_PWRKEY IO1
 #define GPS_EN     IO2
 #define GSM_STATUS IO3
 
 // #####################################################
-// Placa base. La principal diferencia es que en Halley tenemos el ADC y por
-// ende hay que cargar la librería TLA2024 para la lectura de baterías
+// Selección de placa base
 #define RHIO_DEIMOS
 // #define RHIO_HALLEY
 
@@ -48,16 +70,16 @@
 #define RH_APN_USER ""
 #define RH_APN_PASS ""
 
-// Server
-#define RH_SERVER "127.0.0.1" // IP - no se ha probado dominio
-#define RH_PORT "5555"
+// remote
+#define RH_SERVER "127.0.0.1"
+#define RH_PORT "" // production
 
 // #####################################################
-// Pins para lectura analógica de baterías en placas Deimos.
-// Con HalleyBox no se utiliza, incluye un ADC y se utiliza la librería TLA2024
+// Pins para lectura analógica de baterías con Deimos+Shield
 #define VBAT_PIN A3
 #define VSYS_PIN A1
 #define VIN_PIN  A2
 
-// Tamaño del buffer para el uart del modem.
+// Tamaño del buffer para el uart del modem. En general un valor de 120 debe
+// ser suficiente
 #define UART_BUFFER_SIZE 240
