@@ -192,6 +192,12 @@ bool getGps (bool manageTcp) {
   // encarga de aumentar este contador (trackio.transmissionClockCounter).
   // Si venimos de un reset y esta es la primera posición que se intenta enviar,
   // le damos salida para no tener que esperar a que se cumpla el reloj
+  if (cfg.gpsInterval == 0) {
+    return false;
+  }
+
+  // Para que la transmission de gps se pueda llevar a cabo, transmissionClockCounter
+  // debe ser >= cfg.gpsInterval
   if (trackio.transmissionClockCounter < cfg.gpsInterval) {
     // todavía no es momento de enviar el GPS
     return false;
