@@ -820,6 +820,93 @@ bool Trackio::applyConf (char * conf) {
 
 // #############################################################################
 
+void Trackio::createMessage () {
+  char msg[240];
+
+  // primera parte del mensaje, si es OP_AUTO debemos incluir el imei
+  if (cfg.opmode == OP_AUTO) {
+    strcpy(msg, Trackio::imei);
+    strcat(msg, "|s|");
+  } else if (cfg.opmode == OP_TCP) {
+    // si no incluímos solo la "s" para indicar que es un mensaje
+    strcpy(msg, "s|");
+  }
+
+  if (cfg.useGps) {
+    Trackio::getGps();
+    // si no hay fix podemos obtener nada
+    if (Trackio::gps.fix) {
+      if (cfg.useLocation) {
+        strcat(msg, "loc:"); strcat(msg, Trackio::gps.alt); strcat(msg, ",");
+        strcat(msg, Trackio::gps.lon); strcat(msg, "$");
+      }
+
+      if (cfg.useAltitude) {
+        strcat(msg, "alt:"); strcat(msg, Trackio::gps.alt); strcat(msg, "$");
+      }
+
+      if (cfg.useSpeed) {
+        strcat(msg, "sog:"); strcat(msg, Trackio::gps.alt); strcat(msg, "$");
+      }
+
+      if (cfg.useAltitude) {
+        strcat(msg, "cog:"); strcat(msg, Trackio::gps.alt); strcat(msg, "$");
+      }
+
+      if (cfg.useAltitude) {
+        strcat(msg, "sats:"); strcat(msg, Trackio::gps.alt); strcat(msg, "$");
+      }
+
+      if (cfg.useAltitude) {
+        strcat(msg, "hdop:"); strcat(msg, Trackio::gps.alt); strcat(msg, "$");
+      }
+    }
+  }
+
+  if (cfg.useGSM) {
+    Trackio::getSignalStrength();
+    strcat(msg, "gsm:"); strcat(msg, Trackio::gsm); strcat(msg, "$");
+  }
+
+  if (cfg.useDigitalTemp) {
+    // get digital temp
+    strcat(msg, "dtemp:"); /* [...] */ strcat(msg, "$");
+  }
+
+  if (cfg.useAnalogTemp) {
+    strcat(msg, "atemp:"); /* [...] */ strcat(msg, "$");
+  }
+
+  if (cfg.useCo2) {
+    strcat(msg, "co2:"); /* [...] */ strcat(msg, "$");
+  }
+
+  if (cfg.useBatt) {
+    Trackio::getBattery();
+    if (cfg.useVBAT) {
+      char vbat[10]; sprintf(vbat, "%d", Trackio::vbat);
+      strcat(msg, "vb:"); strcat(msg, vbat); strcat(msg, "$");
+    }
+
+    if (cfg.useVIN) {
+      char vin[10]; sprintf(vin, "%d", Trackio::vin);
+      strcat(msg, "vi:"); strcat(msg, vin); strcat(msg, "$");
+    }
+
+    if (cfg.useVSYS) {
+      char vsys[10]; sprintf(vsys, "%d", Trackio::vsys_5v);
+      strcat(msg, "vs:"); strcat(msg, vsys); strcat(msg, "$");
+    }
+  }
+
+  // copiamos el mensaje a variable msg de trackio
+  memset(Trackio::message, 0, sizeof Trackio::message);
+  strcpy(Trackio::message, msg);
+  ___(F("MESSAGE: "), Trackio::message);
+}
+
+// #############################################################################
+
 bool Trackio::openGprs () {
   // Obtener el estado del servicio GPRS
   if (Trackio::gprsIsOpen()) {

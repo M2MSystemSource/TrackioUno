@@ -380,6 +380,11 @@ class Trackio {
      */
     uint8_t transmissionClockCounter;
 
+    /**
+     * @brief Almacena el mensaje creado en Trackio::createMessage()
+     */
+    char message[240];
+
     // #########################################################################
 
     /**
@@ -880,6 +885,9 @@ class Trackio {
      */
     void cmd_setOP(char * op);
 
+    // #########################################################################
+
+    void createMessage();
     // #########################################################################
 
     /**
