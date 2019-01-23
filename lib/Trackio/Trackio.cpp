@@ -593,6 +593,10 @@ bool Trackio::transmit (char * msg) {
 bool Trackio::transmitGps () {
   if (cfg.gpsInterval < 1) return false; // deshabilitado
 
+  // añadimos batería y calidad de red GSM a la trama GPS
+  Trackio::getBattery();
+  Trackio::getSignalStrength();
+
   char gpsdata[150];
   Trackio::resetGpsData();
   Trackio::getGps();
