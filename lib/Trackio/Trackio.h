@@ -286,7 +286,6 @@ class Trackio {
        * el tiempo
        */
       unsigned long transmissionClock;
-    } timers {0, 0};
 
     /**
      * @brief Almacena el voltaje de la batería interna (VBAT)
@@ -459,14 +458,33 @@ class Trackio {
      *
      * Si cfg.battMode=1 se leerá batería del simcom (AT+CBC), solo VBAT
      * Si cfg.battMode=2 se leerá batería de los pines analógicos.
-     *  Las analógicas de VBAT como VIN están declaradas al inicio de Trackio.h
+     *  Las analógicas de VBAT como VIN están declaradas en `static-conf.h`
      * Si cfg.battMode=3 estamos usando Halley, leemos baterías del ADC con
-     *  librería TLA2024
+     *  la librería TLA2024
      *
-     * El resultado se añadirá a la trama GPS en función de Trackio::Conf.addBattToGps
+     * El resultado se añadirá al mensaje en función del modo operacional
+     * seleccionado y la configuración
      */
     void getBattery();
 
+    /**
+     * @brief Lee la batería interna (VBAT) utilizando el comando `AT+CBC` del
+     * simcom.
+     *
+     * Este método es menos preciso que `getAnalogBattery()` o
+     * `getTLA2024Battery()` y solo se utiliza cuando ninguno de los dos
+     * anteriores está disponible. No conoceremos el valor de VSYS y VIN y
+     * el valor devuelto para VBAT está rectificado por el propio simcom, por
+     * lo que nos dará un marge de error de 200/300mv en comparación a medir
+     * la batería directamente con multimetro. No se ha hecho un estudio
+     * preciso sobre cuanta caída hay realmente entre el resultado devuelto
+     * por `AT+CBC` y medir directamente con multímetro.
+     *
+     * Para activar este método de lectura se utiliza el macro
+     * `readBatteryMode = 1`  en `static-conf.h`
+     *
+     * @see Trackio::getBattery()
+     */
     void getSimcomBattery();
 
     // Deimos
@@ -603,8 +621,6 @@ class Trackio {
      */
     bool openGprs ();
 
-    // #########################################################################
-
     /**
      * @brief Habilita GPS
      *
@@ -654,32 +670,8 @@ class Trackio {
      */
     void parseGps(char * gps);
 
-    /**
-     * @brief Parsea el valor de time devuelto por simcom en la con CGNSINF
-     *
-     * El valor de entrada tiene este formato, 20181010115128.000 y queremos
-     * convertirlo a 20181010115128
-     *
-     * @param time
-     */
-    void parseSimcomTime(char * time);
+    // #########################################################################
 
-    /**
-     * @brief Realiza todo el operativo para descargar y actualizar el EPO
-     * file con las efemeridas de los satelites.
-     *
-     * Se trata de un proceso relativamente complejo, que requiere la ejecución
-     * de muchos comandos, incluída la descarga de un fichero desde un servidor
-     * FTP y su procesamiento para guardarlo en memoría fisica.
-     *
-     * Los detalles están especificados en el documento _SIM868 GNSS AGPS
-     * Application Note_
-     *
-     * @see http://simcom.ee/documents/SIM868/SIM868_GNSS_AGPS_Application%20Note_V1.00.pdf
-     * @return true
-     * @return false
-     */
-    bool gpsDownloadEpo();
     bool transmitLogIfFull();
     bool transmitLog();
     int getLogNextIndex();

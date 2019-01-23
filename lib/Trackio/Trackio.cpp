@@ -113,14 +113,15 @@ bool Trackio::begin() {
 
   // comprobamos que se envian comandos AT
   if (!Trackio::checkModem()) {
+    __(F("  == FAIL checkModem"));
     return false;
   }
 
   if (!Trackio::powerOnGps()) {
-    // se quiere usar el GPS pero el poweron ha fallado, revisar pin GPS_EN
-    // y conexión del módulo esclavo
+    // revisar pin GPS_EN y conexión del módulo esclavo
     return false;
   }
+
   #if RH_accel == 1
   Trackio::setupAccel();
   Wire.begin();
@@ -169,7 +170,28 @@ void Trackio::loadConf () {
     cfg.requiredVsys5v = RH_requiredVsys5v;
     cfg.accel = RH_accel;
 
+    cfg.tickTimer = RH_tickTimer;
+    cfg.transmitAlways = RH_transmitAlways;
+    cfg.transmitLog = RH_transmitLog;
+
+    cfg.useDigitalTemp = RH_useDigitalTemp;
+    cfg.useAnalogTemp = RH_useAnalogTemp;
+    cfg.useCo2 = RH_useCo2;
+    cfg.useGps = RH_useGps;
+    cfg.useLocation = RH_useLocation;
+    cfg.useAltitude = RH_useAltitude;
+    cfg.useSpeed = RH_useSpeed;
+    cfg.useCog = RH_useCog;
+    cfg.useSats = RH_useSats;
+    cfg.useHDOP = RH_useHDOP;
+    cfg.useGSM = RH_useGSM;
+    cfg.useBatt = RH_useBatt;
+    cfg.useVBAT = RH_useVBAT;
+    cfg.useVSYS = RH_useVSYS;
+    cfg.useVIN = RH_useVIN;
+
     Trackio::saveConf();
+
   } else {
     __(F("La configuración ya existe."));
     cfg = owner;
@@ -988,12 +1010,6 @@ void Trackio::getGps () {
 
 void Trackio::resetGpsData () {
   Trackio::gps.fix = 0;
-}
-
-void Trackio::parseSimcomTime (char * time) {
-  char * split;
-  split = strtok(time, ".");
-  strcpy(Trackio::gps.time, split);
 }
 
 void Trackio::parseGps (char * gps) {
