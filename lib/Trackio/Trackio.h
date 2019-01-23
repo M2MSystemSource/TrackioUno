@@ -340,6 +340,15 @@ class Trackio {
        */
       unsigned long transmissionClock;
 
+      /**
+       * @brief Se utiliza tickTimer cuando queremos desactivar el envío de alives
+       * y trabajar directamente con un timer. Esto se hace por ejemplo en los
+       * modos OP_AUTO y OP_SENSING, donde se envío y/o almacena un dato cada
+       * x segundos.
+       */
+      unsigned tickTimer;
+    } timers {0, 0, 0};
+
     /**
      * @brief Almacena el voltaje de la batería interna (VBAT)
      * Se obtiene mediante el método Trackio::getBattery()
