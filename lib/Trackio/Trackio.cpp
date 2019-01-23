@@ -1016,19 +1016,23 @@ void Trackio::parseGps (char * gps) {
   char * split = strtok(gps, ",");
 
   split = strtok(NULL, ","); Trackio::gps.fix = atoi(split);
-  split = strtok(NULL, ","); strcpy(Trackio::gps.time, split);
-  split = strtok(NULL, ","); strcpy(Trackio::gps.lat, split);
-  split = strtok(NULL, ","); strcpy(Trackio::gps.lon, split);
-  split = strtok(NULL, ","); strcpy(Trackio::gps.alt, split);
-  split = strtok(NULL, ","); strcpy(Trackio::gps.sog, split);
-  split = strtok(NULL, ","); strcpy(Trackio::gps.cog, split);
-  split = strtok(NULL, ",");
-  split = strtok(NULL, ","); strcpy(Trackio::gps.hdop, split);
-  split = strtok(NULL, ",");
-  split = strtok(NULL, ",");
-  split = strtok(NULL, ","); strcpy(Trackio::gps.sats, split);
-  split = strtok(NULL, ",");
-  split = strtok(NULL, ",");
+  // si hay fix seguimos parseando
+  if (Trackio::gps.fix) {
+    split = strtok(NULL, ","); strcpy(Trackio::gps.time, split);
+    split = strtok(NULL, ","); strcpy(Trackio::gps.lat, split);
+    split = strtok(NULL, ","); strcpy(Trackio::gps.lon, split);
+    split = strtok(NULL, ","); strcpy(Trackio::gps.alt, split);
+    split = strtok(NULL, ","); strcpy(Trackio::gps.sog, split);
+    split = strtok(NULL, ","); strcpy(Trackio::gps.cog, split);
+    split = strtok(NULL, ",");
+    split = strtok(NULL, ","); strcpy(Trackio::gps.hdop, split);
+    split = strtok(NULL, ",");
+    split = strtok(NULL, ",");
+    split = strtok(NULL, ","); strcpy(Trackio::gps.sats, split);
+    split = strtok(NULL, ",");
+    split = strtok(NULL, ",");
+  }
+}
 
 // #############################################################################
 
