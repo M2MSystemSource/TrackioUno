@@ -63,6 +63,8 @@ void transmitAlive();
  * @brief Configuramos el Watchdog. Nada más... el resto se hace en el loop.
  */
 void setup() {
+  Watchdog.disable();
+  delay(500);
   Watchdog.enable(8000);
 }
 
