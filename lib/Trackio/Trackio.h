@@ -189,6 +189,11 @@ struct Conf {
   uint8_t primaryOpMode;
 
   /**
+   * @brief Capacidad para almacenar 100 mensajes
+   */
+  char log[100][100];
+
+  /**
    * @brief En el modo auto indica si debe ir a dormir después de enviar
    * una posición al servidor.
    *
@@ -675,6 +680,9 @@ class Trackio {
      * @return false
      */
     bool gpsDownloadEpo();
+    bool transmitLogIfFull();
+    bool transmitLog();
+    int getLogNextIndex();
 
     // #########################################################################
 

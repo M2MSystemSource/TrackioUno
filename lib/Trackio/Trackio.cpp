@@ -1013,6 +1013,81 @@ void Trackio::parseGps (char * gps) {
   split = strtok(NULL, ","); strcpy(Trackio::gps.sats, split);
   split = strtok(NULL, ",");
   split = strtok(NULL, ",");
+
+// #############################################################################
+
+int Trackio::getLogNextIndex() {
+  int logSize = sizeof(cfg.log);
+  if (logSize < 100) return logSize;
+
+  for (int i = 0; i < 100; i++) {
+    if (strlen(cfg.log[i]) == 0) {
+      // este indice está vacío, lo devolvemos
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+bool Trackio::transmitLogIfFull () {
+  if (Trackio::getLogNextIndex() == -1) {
+    return true;
+  }
+
+  return false;
+}
+
+bool Trackio::transmitLog() {
+  _title(F("TRANSMIT LOG"));
+
+  if (Trackio::tcpIsOpen()) {
+    // cerramos el TCP, no sabemos en que condiciones se ha abierto y necesitamos
+    // que haya una sesion del dispositivo en el servidor, para lo cual es
+    // necesario realizar el registro con sayHello().
+    // Cerramos y a continuación volvemos a abrir con sayHello();
+    Trackio::closeTcp(1);
+  }
+
+  if (!Trackio::gprsIsOpen()) {
+    if (!Trackio::openGprs()) {
+      __(F("  == Fallo al transmitir log, el GPRS no se inicia"));
+      return false;
+    }
+
+    // -> OK GPRS abierto
+  }
+
+  if (!Trackio::openTcp()) {
+    __(F("  == Fallo al transmitir log, no se puede abrir el TCP"));
+    return false;
+  }
+
+  // -> OK TCP abierto
+
+  // nos registramos en el servidor. Esto dejará el TCP abierto y podremos ir
+  // enviando los mensajes del log, al finalizar cerraremos el socket y vaciaremos
+  // el log
+  if (!Trackio::sayHello()) {
+    __(F("  == Fallo al transmitir log. TCP abierto, pero sayHello() ha fallado"));
+    return false;
+  }
+
+  // recorremos el log
+  for (int i = 0; i < 100; i++) {
+    if (strlen(cfg.log[i])) {
+      if (Trackio::transmit(cfg.log[i])) {
+        // el mensaje se ha transmitido, lo eliminamos del log
+        strcpy(cfg.log[i], "");
+        ___(F("  -> log "), i);
+      }
+      // else: la transmision del mensaje ha fallado, lo mantenemos en el para próximo intento
+    }
+  }
+
+  __(F("  == TRANSMISION DEL LOG FINALIZADA"));
+  Trackio::saveConf(); // guardamos el estado de `cfg` con el nuevo log
+  return true;
 }
 
 // #############################################################################
