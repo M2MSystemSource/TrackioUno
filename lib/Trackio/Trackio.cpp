@@ -905,6 +905,16 @@ void Trackio::createMessage () {
   ___(F("MESSAGE: "), Trackio::message);
 }
 
+void Trackio::saveMessage () {
+  Trackio::saveMessage(Trackio::message);
+}
+
+void Trackio::saveMessage (char * message) {
+  int nextIndex = Trackio::getLogNextIndex();
+  if (nextIndex < 0) return;
+  strcpy(cfg.log[nextIndex], message);
+}
+
 // #############################################################################
 
 bool Trackio::openGprs () {
