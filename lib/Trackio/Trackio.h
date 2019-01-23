@@ -69,6 +69,7 @@
  * bajo consumo (sleep), el socket TCP permanece siempre abierto.
  */
 #define OP_TCP 2
+
 /**
  * @brief Modo operacional automático, no mantiene el socket abierto.
  */

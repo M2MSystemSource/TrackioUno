@@ -52,7 +52,7 @@ void op_tcp();
 void op_auto();
 void op_low();
 
-// funciones para su uso en los modos operacionales OP_TCP y OP_AUTO
+// funciones para su uso en los modos operacionales OP_TCP
 bool getGps(bool manageTcp);
 void checkCommand();
 void transmitAlive();
@@ -134,14 +134,14 @@ void op_startup () {
     if (trackio.tcpOk) {
       cfg.opmode = OP_TCP;
     }
-  }
-
-  if (cfg.primaryOpMode == OP_AUTO) {
+  } else if (cfg.primaryOpMode == OP_AUTO) {
     if (trackio.tcpOk) {
       cfg.opmode = OP_AUTO;
       // cerramos el TCP que se a abierto antes (unas líneas más arriba)
       trackio.closeTcp(1);
     }
+  } else {
+    cfg.opmode = cfg.primaryOpMode;
   }
 }
 
@@ -237,7 +237,7 @@ bool getGps (bool manageTcp) {
   }
 
   if (!trackio.transmitGps()) {
-    SerialMon.println(F("  == FAIL GPS"));
+    SerialMon.println(F("  == GPS TRANSMISSION FAIL"));
     cfg.opmode = OP_STARTUP;
     return false;
   }
@@ -290,10 +290,9 @@ void transmitAlive () {
 
 void checkCommand () {
   if (!trackio.listeningTcp) return;
-
-  char ack[20];
   if (trackio.tcpHasCommand()) {
     if (trackio.processCommand(trackio.cmd)) {
+      char ack[20];
       sprintf(ack, "ack|%i", digitalRead(IO6));
       trackio.transmit(ack);
     }
