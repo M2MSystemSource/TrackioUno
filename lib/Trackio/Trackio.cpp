@@ -960,13 +960,13 @@ bool Trackio::openGprs () {
   if (!Trackio::sendAt(apnCmd, 1, OK)) return false;
   Trackio::_delay(1000);
 
-  if (!Trackio::sendAt((char *) "AT+CIICR", 1, OK)) return false;
+  Trackio::sendCommand((char *) "AT+CIICR");
   Trackio::_delay(1000);
 
   Trackio::sendAt((char *) "AT+CIFSR", 1, OK);
   Trackio::_delay(1000);
 
-  return true;
+  return Trackio::gprsIsOpen();
 }
 
 bool Trackio::gprsIsOpen () {
