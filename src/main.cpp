@@ -171,8 +171,33 @@ void op_tcp () {
 // #############################################################################
 
 void op_auto () {
-  getGps(true);
-  if (trackio.tcpOk) trackio.closeTcp(1);
+  // comprobamos si tickTimer se ha cumplido
+  unsigned long clockTimerDiff = (trackio.timers.base - trackio.timers.tickTimer);
+  if (clockTimerDiff >= (cfg.tickTimer * 1000L)) {
+    // reset tickTimer
+    trackio.timers.tickTimer = trackio.timers.base;
+
+    // Creamos el mensaje que vamos a enviar
+    trackio.createMessage();
+
+    if (cfg.transmitAlways) {
+      trackio.transmit(trackio.message);
+    } else {
+      trackio.saveMessage();
+      trackio.transmitLogIfFull();
+    }
+
+    if (cfg.sleep) {
+      if (cfg.deepSleep) {
+        trackio.powerOff();
+      }
+
+      // el método sleep se va a dormir en ciclos de 8 segundos.
+      // debemos deducir cuantos ciclos de 8 segundos tenemos en cfg.tickTimer.
+      int sleepTimes = (int) cfg.tickTimer / 8;
+      trackio.sleepNow(sleepTimes);
+    }
+  }
 }
 
 // #############################################################################
