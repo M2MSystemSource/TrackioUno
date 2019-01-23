@@ -740,6 +740,12 @@ class Trackio {
 
     // #########################################################################
 
+    void getDigitalTemp();
+    void getAnalogTemp();
+    void getCo2Temp();
+
+    // #########################################################################
+
     /**
      * @brief Inicializa el contexo PDP de la conexión y abre puerto TCP
      *
