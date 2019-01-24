@@ -211,7 +211,7 @@ void op_low () {
 
 // #############################################################################
 
-bool getGps (bool manageTcp) {
+bool getGps () {
   // o es la primera posición (tras un reset) o esperamos a que se cumpla el ciclo de reloj
   // en trackio.timers.transmissionClock. El método transmitAlive() (en main.c) se
   // encarga de aumentar este contador (trackio.transmissionClockCounter).
@@ -230,11 +230,6 @@ bool getGps (bool manageTcp) {
 
   trackio.listeningTcp = false;
   trackio.transmissionClockCounter = 0;
-
-  if (manageTcp && !trackio.tcpIsOpen()) {
-    // aseguramos que el TCP está abierto
-    trackio.openTcp();
-  }
 
   if (!trackio.transmitGps()) {
     SerialMon.println(F("  == GPS TRANSMISSION FAIL"));
