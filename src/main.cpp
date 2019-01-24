@@ -53,7 +53,7 @@ void op_auto();
 void op_low();
 
 // funciones para su uso en los modos operacionales OP_TCP
-bool getGps(bool manageTcp);
+bool getGps();
 void checkCommand();
 void transmitAlive();
 
@@ -165,7 +165,7 @@ void op_tcp () {
   #endif
   checkCommand();
   transmitAlive();
-  getGps(false); // obtiene GPS y envía posición a servidor
+  getGps(); // obtiene GPS y envía posición a servidor
 }
 
 // #############################################################################
