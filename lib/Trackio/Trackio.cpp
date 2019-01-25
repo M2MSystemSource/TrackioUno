@@ -150,11 +150,10 @@ void Trackio::configureIOs () {
 }
 
 void Trackio::loadConf () {
-
   Conf owner;
   owner = my_flash_store.read();
 
-  if (!owner.eeprom != 1) {
+  if (owner.eeprom != 1) {
     __(F("Cargamos flash por primera vez"));
     // RECUERDA! No modifiques nada aquí, revisa `lib/trackio/static-conf.h`
     cfg.battMode = RH_battMode;
@@ -203,10 +202,14 @@ void Trackio::loadConf () {
     digitalWrite(IO6, LOW);
   }
 
+  Trackio::showLog();
+
   __(F("Configuración cargada..."));
 }
 
 void Trackio::saveConf () {
+  // avisamos en consola de que vamos a guardar en memoría flash
+  _title("OJO! SAVE CONF");
   my_flash_store.write(cfg);
 }
 
@@ -317,9 +320,9 @@ void Trackio::getSimcomBattery() {
 void Trackio::checkLowBattery () {
   char low = 0;
 
-  if (cfg.requiredVbat >0 && Trackio::vbat < cfg.requiredVbat) low = 1;
-  if (cfg.requiredVin > 0 && Trackio::vin < cfg.requiredVin) low = 1;
-  if (cfg.requiredVsys5v > 0 && Trackio::vsys_5v < cfg.requiredVsys5v) low = 1;
+  if (cfg.requiredVbat > 0 && Trackio::vbat < cfg.requiredVbat) {low = 1; __("LOW VBAT");}
+  if (cfg.requiredVin > 0 && Trackio::vin < cfg.requiredVin) {low = 1; __("LOW VIN");}
+  if (cfg.requiredVsys5v > 0 && Trackio::vsys_5v < cfg.requiredVsys5v) {low = 1; __("LOW VSYS");}
 
   if (low == 1) {
     // reset serial fails, evita reinicio antes de deep sleep
@@ -521,20 +524,12 @@ bool Trackio::tcpIsOpen () {
 bool Trackio::sayHello () {
   char hello[50];
 
-  // debemos transmitir al servidor el modo operacional, OP_TCP/AUTO
-  int opmode = 1; // por defecto TCP
-  if (cfg.primaryOpMode == OP_AUTO) opmode = 2; // si no AUTO
-
   // x debería ser prescindible, pero si inserto Trackio::imei
   // directamente en el sprintf se produce un segmentation fault error
   // que mis altas capacidades en el lenguaje C no logran entender
   char imei[20];
   strcpy(imei, Trackio::imei);
-  if (opmode == 1) {
-    sprintf(hello, "%s|%s", imei, VERSION);
-  } else {
-    sprintf(hello, "%s|%d", imei, opmode);
-  }
+  sprintf(hello, "%s|%s", imei, VERSION);
 
   if (Trackio::tcpOk && Trackio::transmit(hello)) {
     ___(F("buffer: "), buffer);
@@ -545,6 +540,28 @@ bool Trackio::sayHello () {
 
   cfg.opmode = OP_STARTUP;
   return false;
+}
+
+bool Trackio::prepareForTransmission() {
+  if (Trackio::tcpIsOpen()) return true;
+  if (!Trackio::checkCreg()) {
+    __("  == prepareForTransmission: NO CREG");
+    return false;
+  }
+
+  if (!Trackio::gprsIsOpen()) {
+    if (!Trackio::openGprs()) {
+      __("  == prepareForTransmission: No se ha podido iniciar GPRS");
+      return false;
+    }
+  }
+
+  if (!Trackio::openTcp()) {
+    __("  == prepareForTransmission: Fallo al abrir TCP");
+    return false;
+  }
+
+  return true;
 }
 
 bool Trackio::transmit (char * msg) {
@@ -565,8 +582,11 @@ bool Trackio::transmit (char * msg) {
   if (strstr(buffer, "SEND OK")) {
     // Comprobamos si el servidor nos ha devuelto una respuesta
     char * response = getTransmitResponse(buffer);
+    strcpy(Trackio::lastResponse, response);
     ___(F("  == response: "), response);
-    if (isCommand(response)) {
+    if (strcmp(Trackio::lastResponse, "OK") == 0) {
+
+    } else if (Trackio::isCommand(response)) {
       char * cmd = Trackio::extractCommand(response);
       if (Trackio::processCommand(cmd)) {
         ___(F("  == Command PROCESSED: "), cmd);
@@ -848,22 +868,15 @@ bool Trackio::applyConf (char * conf) {
 
 void Trackio::createMessage () {
   char msg[240];
-
-  // primera parte del mensaje, si es OP_AUTO debemos incluir el imei
-  if (cfg.opmode == OP_AUTO) {
-    strcpy(msg, Trackio::imei);
-    strcat(msg, "|s|");
-  } else if (cfg.opmode == OP_TCP) {
-    // si no incluímos solo la "s" para indicar que es un mensaje
-    strcpy(msg, "s|");
-  }
+  long messageId = random(10000);
+  sprintf(msg, "msg|%lu|", messageId);
 
   if (cfg.useGps) {
     Trackio::getGps();
     // si no hay fix podemos obtener nada
     if (Trackio::gps.fix) {
       if (cfg.useLocation) {
-        strcat(msg, "loc:"); strcat(msg, Trackio::gps.alt); strcat(msg, ",");
+        strcat(msg, "loc:"); strcat(msg, Trackio::gps.lat); strcat(msg, ",");
         strcat(msg, Trackio::gps.lon); strcat(msg, "$");
       }
 
@@ -936,9 +949,17 @@ void Trackio::saveMessage () {
 }
 
 void Trackio::saveMessage (char * message) {
+  if (sizeof(message) >= RH_LOG_BYTES) {
+    _title("No se puede guardar el mensaje, demasiado largo");
+  }
   int nextIndex = Trackio::getLogNextIndex();
+  ___("next log index", nextIndex);
   if (nextIndex < 0) return;
   strcpy(cfg.log[nextIndex], message);
+
+  if (cfg.persistLog) {
+    Trackio::saveConf();
+  }
 }
 
 // #############################################################################
@@ -1002,9 +1023,6 @@ bool Trackio::powerOnGps () {
 void Trackio::getGps () {
   if (cfg.gpsInterval < 1) return;
 
-  Trackio::getBattery();
-  Trackio::getSignalStrength();
-
   if (Trackio::sendAt((char *) "AT+CGNSINF", 1)) {
     char * split = strtok(buffer, " ");
     split = strtok(NULL, " ");
@@ -1040,11 +1058,18 @@ void Trackio::parseGps (char * gps) {
 
 // #############################################################################
 
-int Trackio::getLogNextIndex() {
-  int logSize = sizeof(cfg.log);
-  if (logSize < 100) return logSize;
+int Trackio::countLog () {
+  int total = 0;
 
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < RH_LOG_SIZE; i++) {
+    if (strlen(cfg.log[i]) > 0) total++;
+  }
+
+  return total;
+}
+
+int Trackio::getLogNextIndex() {
+  for (int i = 0; i < RH_LOG_SIZE; i++) {
     if (strlen(cfg.log[i]) == 0) {
       // este indice está vacío, lo devolvemos
       return i;
@@ -1055,10 +1080,13 @@ int Trackio::getLogNextIndex() {
 }
 
 bool Trackio::transmitLogIfFull () {
-  if (Trackio::getLogNextIndex() == -1) {
-    return true;
+  __(F("> transmitLogIfFull"));
+  if (Trackio::countLog() >= RH_LOG_SIZE) {
+    __(" -> The log is FULL");
+    return Trackio::transmitLog();
   }
 
+  __(" -> Log not FULL");
   return false;
 }
 
@@ -1098,7 +1126,7 @@ bool Trackio::transmitLog() {
   }
 
   // recorremos el log
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < RH_LOG_SIZE; i++) {
     if (strlen(cfg.log[i])) {
       if (Trackio::transmit(cfg.log[i])) {
         // el mensaje se ha transmitido, lo eliminamos del log
@@ -1106,12 +1134,20 @@ bool Trackio::transmitLog() {
         ___(F("  -> log "), i);
       }
       // else: la transmision del mensaje ha fallado, lo mantenemos en el para próximo intento
+      delay(100);
     }
   }
 
   __(F("  == TRANSMISION DEL LOG FINALIZADA"));
-  Trackio::saveConf(); // guardamos el estado de `cfg` con el nuevo log
+  Trackio::closeTcp(1);
   return true;
+}
+
+void Trackio::showLog() {
+  _title("Show Log");
+  for (int i = 0; i < RH_LOG_SIZE; i++) {
+    ___(i, cfg.log[i]);
+  }
 }
 
 // #############################################################################

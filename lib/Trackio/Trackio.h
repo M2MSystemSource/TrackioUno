@@ -192,7 +192,7 @@ struct Conf {
   /**
    * @brief Capacidad para almacenar 100 mensajes
    */
-  char log[100][100];
+  char log[RH_LOG_SIZE][RH_LOG_BYTES];
 
   /**
    * @brief En el modo auto indica si debe ir a dormir después de enviar
@@ -258,6 +258,14 @@ struct Conf {
    * al número indicado aquí se iniciará la transmisión.
    */
   int transmitLog;
+
+  /**
+   * @brief Indica si el log debe ser guardado en memoria flash cada vez que
+   * se crea un mensaje y se transmite el log
+   *
+   *
+   */
+  bool persistLog;
 
   /**
    * @brief Almacena el estado de IO6 (HIGH/LOW)
@@ -451,6 +459,11 @@ class Trackio {
      * @brief Almacena el mensaje creado en Trackio::createMessage()
      */
     char message[240];
+
+    /**
+     * @brief Almacena la ultima respuesta devuelta por transmit()
+     */
+    char lastResponse[240];
 
     // #########################################################################
 
@@ -738,6 +751,8 @@ class Trackio {
     bool transmitLogIfFull();
     bool transmitLog();
     int getLogNextIndex();
+    int countLog();
+    void showLog();
 
     // #########################################################################
 
@@ -976,6 +991,24 @@ class Trackio {
      * @return false
      */
     bool transmit(char * msg);
+
+    /**
+     * @brief Abre el TCP, uso conjunto con Trackio::transmit()
+     *
+     * El método Trackio::transmit() da por hecho que una conexión TCP está
+     * activa, esto se hizo así cuando trabajamos exclusivamente con TCP abierto
+     * (modo bidireccional de comunicación).
+     *
+     * Si queremos hacer una transmission pero no conocemos el estado del TCP
+     * debemos usar primero este método. No solo comprobará el estado del TCP,
+     * si no tambien del GPRS y estado de la red en general.
+     *
+     * Si despues de todo consigue abrir el TCP devolverá TRUE, sino FALSE
+     *
+     * @return true Si consigue abrir el TCP
+     * @return false En caso de error
+     */
+    bool prepareForTransmission();
 
     /**
      * @brief A

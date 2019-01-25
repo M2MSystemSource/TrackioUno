@@ -63,8 +63,6 @@ void transmitAlive();
  * @brief Configuramos el Watchdog. Nada más... el resto se hace en el loop.
  */
 void setup() {
-  Watchdog.disable();
-  delay(500);
   Watchdog.enable(8000);
 }
 
@@ -104,13 +102,14 @@ void loop() {
  * para realizar nuevamente la inicialización de la aplicación
  */
 void op_startup () {
+  // reset data...
   digitalWrite(LED, LOW);
   firstPositionHasBeenSent = false;
 
   if (!trackio.begin()) {
     SerialMon.println(F("Trackio Critical FAIL - SIM868 can't start"));
     SerialMon.println(F("Try to powerof and check connection of master/slave modules"));
-    trackio._delay(5000);
+    trackio.hardReset();
     return;
   }
 
@@ -118,27 +117,19 @@ void op_startup () {
     return;
   }
 
-  // el imei es fundamental para construir las tramas que se envían al servidor
-  // aquí lo obtenemos y se guarda en Trackio::imei
-  trackio.getImei();
-
-  // para OP_TCP y OP_AUTO iniciamos el registro de red gsm/gprs y puerto TCP
-  if (cfg.primaryOpMode == OP_TCP || cfg.primaryOpMode == OP_AUTO) {
-    trackio.checkStatus();
-    trackio.openGprs();
-    trackio.openTcp();
-    trackio.sayHello();
+  //
+  if (!trackio.checkStatus()) {
+    // si algo falla volvemos a empezar...
+    return;
   }
+  trackio.openGprs();
 
   if (cfg.primaryOpMode == OP_TCP) {
+    // si es modo TCP abrimos ya el puerto y hacemos el registro en servidor
+    trackio.openTcp();
     if (trackio.tcpOk) {
+      trackio.sayHello();
       cfg.opmode = OP_TCP;
-    }
-  } else if (cfg.primaryOpMode == OP_AUTO) {
-    if (trackio.tcpOk) {
-      cfg.opmode = OP_AUTO;
-      // cerramos el TCP que se a abierto antes (unas líneas más arriba)
-      trackio.closeTcp(1);
     }
   } else {
     cfg.opmode = cfg.primaryOpMode;
@@ -177,17 +168,44 @@ void op_auto () {
     // reset tickTimer
     trackio.timers.tickTimer = trackio.timers.base;
 
+    _title(F("TRANSMIT MESSAGE"));
+
     // Creamos el mensaje que vamos a enviar
     trackio.createMessage();
+    // con cfg.transmitAlways nos permite saber si el mensaje se ha enviado
+    // en caso negativo lo podremos guardar en log y enviar más tarde
+    bool transmitted = false;
 
     if (cfg.transmitAlways) {
-      trackio.transmit(trackio.message);
-    } else {
+      // realizamos la transmisión. en este punto es posible que la situación del
+      // dispositivo no sea correcta, es decir, puede que nos hayan movido de sitio
+      // y ahora mismo no tengamos cobertura GSM para el envío de datos.
+      // prepareForTransmission se encargará de hacer las comprobaciones
+      // y abrir TCP
+      if (trackio.prepareForTransmission()) {
+        delay(1000);
+        if (trackio.sayHello()) {
+          delay(1000);
+          if (trackio.transmit(trackio.message)) {
+            transmitted = true;
+          }
+        }
+      } // else: el dispositivo no se encuentra en disposición de enviar datos
+
+      trackio.closeTcp(1);
+    }
+
+    if (!transmitted || !cfg.transmitAlways) {
+      __("SAVE MESSAGE");
       trackio.saveMessage();
-      trackio.transmitLogIfFull();
+    }
+
+    if (!trackio.transmitLogIfFull()) {
+      __("  == ERROR TRANSMITING LOG");
     }
 
     if (cfg.sleep) {
+      delay(1000);
       if (cfg.deepSleep) {
         trackio.powerOff();
       }
@@ -196,8 +214,23 @@ void op_auto () {
       // debemos deducir cuantos ciclos de 8 segundos tenemos en cfg.tickTimer.
       int sleepTimes = (int) cfg.tickTimer / 8;
       trackio.sleepNow(sleepTimes);
+
+      if (cfg.deepSleep) {
+        // si venimos de deepsleep tratamos de despertar el sim868
+        if (!trackio.powerOn()) {
+          // si falla realizamos la rutina de arranque desde el principio
+          cfg.opmode = OP_STARTUP;
+        } else {
+          trackio.checkModem();
+          if (cfg.useGps) {
+            trackio.powerOnGps();
+          }
+        }
+      }
     }
   }
+
+  _(F("."));
 }
 
 // #############################################################################
